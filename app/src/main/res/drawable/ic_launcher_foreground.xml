@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Stylized Computer Mouse Outer Body -->
+    <path
+        android:strokeWidth="3.5"
+        android:strokeColor="#6C63FF"
+        android:fillColor="#156C63FF"
+        android:strokeLineCap="round"
+        android:pathData="M38,34 C38,24 45,18 54,18 C63,18 70,24 70,34 L70,74 C70,84 63,90 54,90 C45,90 38,84 38,74 Z" />
+
+    <!-- Split Left/Right Button Line -->
+    <path
+        android:strokeWidth="2.5"
+        android:strokeColor="#6C63FF"
+        android:strokeLineCap="round"
+        android:pathData="M54,18 L54,42" />
+
+    <!-- Mouse Scroll Wheel -->
+    <path
+        android:fillColor="#EEEEF8"
+        android:pathData="M52.5,28 h3 v8 h-3 z" />
+
+    <!-- Dynamic Pointer Cursor hovering over the mouse -->
+    <path
+        android:fillColor="#EEEEF8"
+        android:strokeColor="#0A0A0F"
+        android:strokeWidth="1.5"
+        android:strokeLineJoin="miter"
+        android:pathData="M56,50 L56,71 L63,65 L70,76 L73,74 L66,63 L74,63 Z" />
+
+</vector>

@@ -1,0 +1,6 @@
+{
+  "name": "PointerX",
+  "description": "Mouse Controller for Android with floating touchpad, custom cursors, gestures and overlay controls.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
