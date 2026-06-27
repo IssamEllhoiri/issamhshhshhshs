@@ -176,17 +176,47 @@ class PointerAccessibilityService : AccessibilityService() {
         val text = node.text?.toString() ?: ""
         val contentDesc = node.contentDescription?.toString() ?: ""
         val viewId = node.viewIdResourceName?.lowercase() ?: ""
+        val packageName = node.packageName?.toString() ?: ""
 
         val lowerText = text.lowercase()
         val lowerDesc = contentDesc.lowercase()
+        val lowerPackage = packageName.lowercase()
 
-        // 1. Link detection (روابط)
+        // Check if we are interacting with a browser or WebView container
+        val isBrowserPackage = lowerPackage.contains("browser") || 
+                lowerPackage.contains("chrome") || 
+                lowerPackage.contains("firefox") || 
+                lowerPackage.contains("opera") || 
+                lowerPackage.contains("duckduckgo") || 
+                lowerPackage.contains("microsoft.emmx") || 
+                lowerPackage.contains("googlequicksearchbox") ||
+                lowerPackage.contains("brave") ||
+                lowerPackage.contains("via") ||
+                className.contains("WebView", ignoreCase = true)
+
+        // 1. Browser Search Bar & Web Search Engine Inputs Detection (محرك البحث)
+        val isSearchField = (node.isEditable || className.contains("EditText", ignoreCase = true)) ||
+                (isBrowserPackage && (
+                    viewId.contains("search") || viewId.contains("url") || viewId.contains("address") || viewId.contains("omnibox") || viewId.contains("location") ||
+                    lowerText.contains("search") || lowerText.contains("بحث") || lowerText.contains("find") || lowerText.contains("اكتب") || lowerText.contains("type") || lowerText.contains("عنوان") ||
+                    lowerDesc.contains("search") || lowerDesc.contains("بحث") || lowerDesc.contains("find") || lowerDesc.contains("type") || lowerDesc.contains("url")
+                ))
+
+        if (isSearchField) {
+            return Pair(PointerServiceCoordinator.textCursorShape, "TEXT")
+        }
+
+        // 2. Web Links & Browser Clickable Elements Detection (روابط داخل متصفح)
         val isLink = lowerText.startsWith("http://") || lowerText.startsWith("https://") ||
                 lowerText.contains("www.") || lowerText.contains("link") || lowerText.contains("رابط") ||
                 lowerDesc.contains("link") || lowerDesc.contains("رابط") ||
-                viewId.contains("link") || viewId.contains("url")
+                viewId.contains("link") || viewId.contains("url") ||
+                (isBrowserPackage && node.isClickable && (
+                    className.contains("View") || className.contains("TextView") || className.contains("Anchor") ||
+                    lowerText.isNotEmpty() || lowerDesc.isNotEmpty()
+                ))
 
-        // 2. File/Folder detection (ملفات أو مجلدات)
+        // 3. File/Folder detection (ملفات أو مجلدات)
         val isFileOrFolder = lowerText.contains(".pdf") || lowerText.contains(".zip") || lowerText.contains(".mp3") ||
                 lowerText.contains(".mp4") || lowerText.contains(".jpg") || lowerText.contains(".png") ||
                 lowerText.contains(".txt") || lowerText.contains(".doc") || lowerText.contains(".docx") ||
@@ -201,8 +231,8 @@ class PointerAccessibilityService : AccessibilityService() {
             return Pair(PointerServiceCoordinator.hoverCursorShape, "HOVER")
         }
 
-        // Editable text fields
-        if (node.isEditable || className.contains("EditText", ignoreCase = true) || className.contains("TextView", ignoreCase = true) && node.isFocusable) {
+        // General Editable text fields fallback
+        if (node.isEditable || className.contains("EditText", ignoreCase = true) || (className.contains("TextView", ignoreCase = true) && node.isFocusable)) {
             return Pair(PointerServiceCoordinator.textCursorShape, "TEXT")
         }
 
