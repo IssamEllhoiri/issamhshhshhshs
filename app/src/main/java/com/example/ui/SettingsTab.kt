@@ -44,6 +44,9 @@ fun SettingsTab(viewModel: MainViewModel) {
     val defaultCursorImage by viewModel.defaultCursorImage.collectAsState()
     val hoverCursorImage by viewModel.hoverCursorImage.collectAsState()
     val textCursorImage by viewModel.textCursorImage.collectAsState()
+    val cursorHighlightEnabled by viewModel.cursorHighlightEnabled.collectAsState()
+    val cursorHighlightThickness by viewModel.cursorHighlightThickness.collectAsState()
+    val cursorHighlightColor by viewModel.cursorHighlightColor.collectAsState()
     val panelAlpha by viewModel.panelAlpha.collectAsState()
     val panelSize by viewModel.panelSize.collectAsState()
     val panelColor by viewModel.panelColor.collectAsState()
@@ -306,6 +309,92 @@ fun SettingsTab(viewModel: MainViewModel) {
                     },
                     onRemoveImage = { viewModel.updateHoverCursorImage("") }
                 )
+            }
+        }
+
+        // --- SECTION 1.5: CURSOR HIGHLIGHT SETTINGS ---
+        SettingsSectionHeader(title = "Cursor Highlight & Border Ring")
+        Card(
+            colors = CardDefaults.cardColors(containerColor = BgTertiary),
+            shape = RoundedCornerShape(16.dp),
+            border = BorderStroke(1.dp, BorderColor),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                SettingsToggleRow(
+                    title = "Enable Cursor Highlight Ring",
+                    checked = cursorHighlightEnabled,
+                    onCheckedChange = { viewModel.updateCursorHighlightEnabled(it) }
+                )
+
+                if (cursorHighlightEnabled) {
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = "Highlight Ring Thickness ($cursorHighlightThickness dp)",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextPrimary
+                    )
+                    Slider(
+                        value = cursorHighlightThickness.toFloat(),
+                        onValueChange = { viewModel.updateCursorHighlightThickness(it.toInt()) },
+                        valueRange = 1f..15f,
+                        colors = SliderDefaults.colors(
+                            activeTrackColor = AccentPrimary,
+                            thumbColor = AccentPrimary
+                        )
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = "Highlight Ring Color",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextPrimary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        ColorPickerButton(
+                            colorName = "PURPLE",
+                            colorVal = Color(0xFF6C63FF),
+                            isSelected = cursorHighlightColor == "PURPLE",
+                            onClick = { viewModel.updateCursorHighlightColor("PURPLE") }
+                        )
+                        ColorPickerButton(
+                            colorName = "BLUE",
+                            colorVal = Color(0xFF40C4FF),
+                            isSelected = cursorHighlightColor == "BLUE",
+                            onClick = { viewModel.updateCursorHighlightColor("BLUE") }
+                        )
+                        ColorPickerButton(
+                            colorName = "RED",
+                            colorVal = Color(0xFFFF5252),
+                            isSelected = cursorHighlightColor == "RED",
+                            onClick = { viewModel.updateCursorHighlightColor("RED") }
+                        )
+                        ColorPickerButton(
+                            colorName = "GOLD",
+                            colorVal = Color(0xFFFFB300),
+                            isSelected = cursorHighlightColor == "GOLD",
+                            onClick = { viewModel.updateCursorHighlightColor("GOLD") }
+                        )
+                        ColorPickerButton(
+                            colorName = "GREEN",
+                            colorVal = Color(0xFF4CAF50),
+                            isSelected = cursorHighlightColor == "GREEN",
+                            onClick = { viewModel.updateCursorHighlightColor("GREEN") }
+                        )
+                        ColorPickerButton(
+                            colorName = "WHITE",
+                            colorVal = Color(0xFFEEEEF8),
+                            isSelected = cursorHighlightColor == "WHITE",
+                            onClick = { viewModel.updateCursorHighlightColor("WHITE") }
+                        )
+                    }
+                }
             }
         }
 

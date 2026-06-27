@@ -22,13 +22,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val isOverlayActive: StateFlow<Boolean> = PointerServiceCoordinator.isOverlayActive
     val isAccessibilityActive: StateFlow<Boolean> = PointerServiceCoordinator.isAccessibilityActive
 
-    private val _isSimulatorActive = kotlinx.coroutines.flow.MutableStateFlow(false)
-    val isSimulatorActive: StateFlow<Boolean> = _isSimulatorActive
-
-    fun setSimulatorActive(active: Boolean) {
-        _isSimulatorActive.value = active
-    }
-
     // Settings flows
     val firstRun: StateFlow<Boolean> = dataStore.firstRunFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
@@ -65,6 +58,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     val textCursorImage: StateFlow<String> = dataStore.textCursorImageFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
+
+    val cursorHighlightEnabled: StateFlow<Boolean> = dataStore.cursorHighlightEnabledFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val cursorHighlightThickness: StateFlow<Int> = dataStore.cursorHighlightThicknessFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 4)
+
+    val cursorHighlightColor: StateFlow<String> = dataStore.cursorHighlightColorFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "PURPLE")
 
     val panelAlpha: StateFlow<Float> = dataStore.panelAlphaFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.9f)
@@ -143,6 +145,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun updateTextCursorImage(imagePath: String) {
         viewModelScope.launch { dataStore.updateTextCursorImage(imagePath) }
+    }
+
+    fun updateCursorHighlightEnabled(enabled: Boolean) {
+        viewModelScope.launch { dataStore.updateCursorHighlightEnabled(enabled) }
+    }
+
+    fun updateCursorHighlightThickness(thickness: Int) {
+        viewModelScope.launch { dataStore.updateCursorHighlightThickness(thickness) }
+    }
+
+    fun updateCursorHighlightColor(color: String) {
+        viewModelScope.launch { dataStore.updateCursorHighlightColor(color) }
     }
 
     fun updatePanelAlpha(alpha: Float) {

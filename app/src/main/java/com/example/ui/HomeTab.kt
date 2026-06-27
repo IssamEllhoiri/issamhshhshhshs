@@ -147,51 +147,6 @@ fun HomeTab(
             }
         }
 
-        // Sandbox Simulation Mode Toggle Card
-        val isSimulatorActive by viewModel.isSimulatorActive.collectAsState()
-        Card(
-            colors = CardDefaults.cardColors(
-                containerColor = if (isSimulatorActive) AccentGlow else BgSecondary
-            ),
-            shape = RoundedCornerShape(16.dp),
-            border = BorderStroke(1.dp, if (isSimulatorActive) AccentPrimary else BorderColor),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Row(
-                modifier = Modifier.padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Demo Sandbox Simulator",
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = TextPrimary
-                        )
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "No system permissions required! Toggle this to test the precision touchpad, mouse pointer, and action buttons directly inside this preview.",
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            color = TextSecondary,
-                            lineHeight = 16.sp
-                        )
-                    )
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-                Switch(
-                    checked = isSimulatorActive,
-                    onCheckedChange = { active ->
-                        viewModel.setSimulatorActive(active)
-                    },
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = AccentPrimary,
-                        checkedTrackColor = AccentGlow
-                    )
-                )
-            }
-        }
-
         // 2. Statistics Grid (2x2)
         Text(
             text = "Current Session Status",

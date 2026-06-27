@@ -24,6 +24,10 @@ class SettingsDataStore(private val context: Context) {
         val HOVER_CURSOR_IMAGE = stringPreferencesKey("hover_cursor_image")
         val TEXT_CURSOR_IMAGE = stringPreferencesKey("text_cursor_image")
         
+        val CURSOR_HIGHLIGHT_ENABLED = booleanPreferencesKey("cursor_highlight_enabled")
+        val CURSOR_HIGHLIGHT_THICKNESS = intPreferencesKey("cursor_highlight_thickness")
+        val CURSOR_HIGHLIGHT_COLOR = stringPreferencesKey("cursor_highlight_color")
+        
         val PANEL_ALPHA = floatPreferencesKey("panel_alpha")
         val PANEL_SIZE = stringPreferencesKey("panel_size")
         val PANEL_SIDE = stringPreferencesKey("panel_side")
@@ -63,6 +67,10 @@ class SettingsDataStore(private val context: Context) {
     val defaultCursorImageFlow: Flow<String> = context.dataStore.data.map { it[DEFAULT_CURSOR_IMAGE] ?: "" }
     val hoverCursorImageFlow: Flow<String> = context.dataStore.data.map { it[HOVER_CURSOR_IMAGE] ?: "" }
     val textCursorImageFlow: Flow<String> = context.dataStore.data.map { it[TEXT_CURSOR_IMAGE] ?: "" }
+    
+    val cursorHighlightEnabledFlow: Flow<Boolean> = context.dataStore.data.map { it[CURSOR_HIGHLIGHT_ENABLED] ?: false }
+    val cursorHighlightThicknessFlow: Flow<Int> = context.dataStore.data.map { it[CURSOR_HIGHLIGHT_THICKNESS] ?: 4 }
+    val cursorHighlightColorFlow: Flow<String> = context.dataStore.data.map { it[CURSOR_HIGHLIGHT_COLOR] ?: "PURPLE" }
 
     val panelAlphaFlow: Flow<Float> = context.dataStore.data.map { it[PANEL_ALPHA] ?: 0.9f }
     val panelSizeFlow: Flow<String> = context.dataStore.data.map { it[PANEL_SIZE] ?: "MEDIUM" }
@@ -129,6 +137,10 @@ class SettingsDataStore(private val context: Context) {
     suspend fun updateDefaultCursorImage(imagePath: String) = context.dataStore.edit { it[DEFAULT_CURSOR_IMAGE] = imagePath }
     suspend fun updateHoverCursorImage(imagePath: String) = context.dataStore.edit { it[HOVER_CURSOR_IMAGE] = imagePath }
     suspend fun updateTextCursorImage(imagePath: String) = context.dataStore.edit { it[TEXT_CURSOR_IMAGE] = imagePath }
+    
+    suspend fun updateCursorHighlightEnabled(enabled: Boolean) = context.dataStore.edit { it[CURSOR_HIGHLIGHT_ENABLED] = enabled }
+    suspend fun updateCursorHighlightThickness(thickness: Int) = context.dataStore.edit { it[CURSOR_HIGHLIGHT_THICKNESS] = thickness }
+    suspend fun updateCursorHighlightColor(color: String) = context.dataStore.edit { it[CURSOR_HIGHLIGHT_COLOR] = color }
 
     suspend fun updatePanelAlpha(alpha: Float) = context.dataStore.edit { it[PANEL_ALPHA] = alpha }
     suspend fun updatePanelSize(size: String) = context.dataStore.edit { it[PANEL_SIZE] = size }

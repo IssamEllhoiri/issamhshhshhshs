@@ -19,6 +19,11 @@ class CursorView @JvmOverloads constructor(
     private var cursorColor = Color.parseColor("#EEEEF8") // Standard default light
     private var clickVfxEnabled = true
 
+    // Highlight options
+    private var highlightEnabled = false
+    private var highlightThicknessPx = 4f * resources.displayMetrics.density
+    private var highlightColor = Color.parseColor("#6C63FF")
+
     // Visual effect variables
     private var clickRippleRadius = 0f
     private var clickRippleAlpha = 0
@@ -113,6 +118,30 @@ class CursorView @JvmOverloads constructor(
         invalidate()
     }
 
+    fun setHighlightEnabled(enabled: Boolean) {
+        highlightEnabled = enabled
+        invalidate()
+    }
+
+    fun setHighlightThickness(thicknessDp: Int) {
+        highlightThicknessPx = thicknessDp * resources.displayMetrics.density
+        invalidate()
+    }
+
+    fun setHighlightColor(colorString: String) {
+        highlightColor = when (colorString.uppercase()) {
+            "PURPLE" -> Color.parseColor("#6C63FF")
+            "BLUE" -> Color.parseColor("#40C4FF")
+            "RED" -> Color.parseColor("#FF5252")
+            "GOLD" -> Color.parseColor("#FFB300")
+            "GREEN" -> Color.parseColor("#4CAF50")
+            "WHITE" -> Color.parseColor("#EEEEF8")
+            "BLACK" -> Color.BLACK
+            else -> Color.parseColor("#6C63FF")
+        }
+        invalidate()
+    }
+
     fun setDefaultCursorImage(path: String?) {
         defaultCursorBitmap = try {
             if (!path.isNullOrEmpty()) BitmapFactory.decodeFile(path) else null
@@ -164,6 +193,17 @@ class CursorView @JvmOverloads constructor(
         
         val hX = hotspotOffset
         val hY = hotspotOffset
+
+        // Draw cursor highlight (halo ring)
+        if (highlightEnabled) {
+            val hPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                style = Paint.Style.STROKE
+                strokeWidth = highlightThicknessPx
+                color = highlightColor
+            }
+            val radius = cursorSizePx * 0.7f
+            canvas.drawCircle(hX, hY, radius, hPaint)
+        }
 
         // 1. Draw click VFX ripple under the cursor
         if (clickRippleAlpha > 0 && clickRippleRadius > 0f) {

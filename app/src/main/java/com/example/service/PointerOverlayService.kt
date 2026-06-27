@@ -252,6 +252,21 @@ class PointerOverlayService : Service() {
                 cursorView?.setTextCursorImage(imagePath)
             }
         }
+        serviceScope.launch {
+            dataStore.cursorHighlightEnabledFlow.collectLatest { enabled ->
+                cursorView?.setHighlightEnabled(enabled)
+            }
+        }
+        serviceScope.launch {
+            dataStore.cursorHighlightThicknessFlow.collectLatest { thickness ->
+                cursorView?.setHighlightThickness(thickness)
+            }
+        }
+        serviceScope.launch {
+            dataStore.cursorHighlightColorFlow.collectLatest { color ->
+                cursorView?.setHighlightColor(color)
+            }
+        }
     }
 
     private fun getStatusBarHeight(): Int {
