@@ -107,6 +107,10 @@ class PointerOverlayService : Service() {
         val density = resources.displayMetrics.density
         val cursorSize = (80 * density).toInt()
 
+        val (screenWidth, screenHeight) = PointerServiceCoordinator.getRealScreenSize(this)
+        val startX = screenWidth / 2f
+        val startY = screenHeight / 2f
+
         // 1. Cursor Window Params
         cursorParams = WindowManager.LayoutParams(
             cursorSize,
@@ -118,13 +122,13 @@ class PointerOverlayService : Service() {
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = 200
-            y = 400
+            x = (startX - (cursorSize / 2f)).toInt()
+            y = (startY - (cursorSize / 2f)).toInt()
         }
 
         cursorView = CursorView(this).apply {
             // Register click listener triggers through coordinator
-            PointerServiceCoordinator.updateCursorPosition(200f, 400f)
+            PointerServiceCoordinator.updateCursorPosition(startX, startY)
         }
         windowManager.addView(cursorView, cursorParams)
 
@@ -143,9 +147,8 @@ class PointerOverlayService : Service() {
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            val displayMetrics = resources.displayMetrics
-            x = displayMetrics.widthPixels - cWidth
-            y = displayMetrics.heightPixels / 2 - cHeight / 2
+            x = screenWidth - cWidth
+            y = screenHeight / 2 - cHeight / 2
         }
 
         panelView = FloatingPanelView(this, windowManager, panelParams, dataStore, serviceScope)

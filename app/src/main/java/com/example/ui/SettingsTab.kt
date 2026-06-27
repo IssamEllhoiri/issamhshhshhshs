@@ -45,6 +45,8 @@ fun SettingsTab(viewModel: MainViewModel) {
     val hoverCursorImage by viewModel.hoverCursorImage.collectAsState()
     val textCursorImage by viewModel.textCursorImage.collectAsState()
     val panelAlpha by viewModel.panelAlpha.collectAsState()
+    val panelSize by viewModel.panelSize.collectAsState()
+    val panelColor by viewModel.panelColor.collectAsState()
     val vibrationEnabled by viewModel.vibration.collectAsState()
     val scrollSpeed by viewModel.scrollSpeed.collectAsState()
     val autoStart by viewModel.autoStart.collectAsState()
@@ -143,6 +145,12 @@ fun SettingsTab(viewModel: MainViewModel) {
                         colorVal = Color(0xFFFF5252),
                         isSelected = cursorColor == "RED",
                         onClick = { viewModel.updateCursorColor("RED") }
+                    )
+                    ColorPickerButton(
+                        colorName = "BLACK",
+                        colorVal = Color(0xFF000000),
+                        isSelected = cursorColor == "BLACK",
+                        onClick = { viewModel.updateCursorColor("BLACK") }
                     )
                 }
 
@@ -324,6 +332,59 @@ fun SettingsTab(viewModel: MainViewModel) {
                         thumbColor = AccentPrimary
                     )
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Floating Panel Size Setting
+                SegmentedSelector(
+                    label = "حجم اللوحة العائمة",
+                    selectedValue = panelSize,
+                    options = listOf(
+                        Pair("SMALL", "صغير"),
+                        Pair("MEDIUM", "متوسط"),
+                        Pair("LARGE", "كبير")
+                    ),
+                    onValueSelected = { viewModel.updatePanelSize(it) }
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Floating Panel Color Setting
+                Text(
+                    text = "لون اللوحة العائمة",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextPrimary
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    ColorPickerButton(
+                        colorName = "DEFAULT",
+                        colorVal = Color(0xFF1C1C28), // Slate Gray
+                        isSelected = panelColor == "DEFAULT",
+                        onClick = { viewModel.updatePanelColor("DEFAULT") }
+                    )
+                    ColorPickerButton(
+                        colorName = "BLACK",
+                        colorVal = Color(0xFF000000), // Pitch Black
+                        isSelected = panelColor == "BLACK",
+                        onClick = { viewModel.updatePanelColor("BLACK") }
+                    )
+                    ColorPickerButton(
+                        colorName = "BLUE",
+                        colorVal = Color(0xFF0A192F), // Navy/Blue
+                        isSelected = panelColor == "BLUE",
+                        onClick = { viewModel.updatePanelColor("BLUE") }
+                    )
+                    ColorPickerButton(
+                        colorName = "RED",
+                        colorVal = Color(0xFF2B1212), // Dark Red
+                        isSelected = panelColor == "RED",
+                        onClick = { viewModel.updatePanelColor("RED") }
+                    )
+                }
             }
         }
 
@@ -704,5 +765,58 @@ fun saveUriToInternalStorage(context: android.content.Context, uri: Uri, fileNam
     } catch (e: Exception) {
         e.printStackTrace()
         ""
+    }
+}
+
+@Composable
+fun SegmentedSelector(
+    label: String,
+    selectedValue: String,
+    options: List<Pair<String, String>>,
+    onValueSelected: (String) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = TextPrimary
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .background(BgSecondary)
+                .border(BorderStroke(1.dp, BorderColor), RoundedCornerShape(10.dp)),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            options.forEachIndexed { index, (value, display) ->
+                val isSelected = selectedValue == value
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(if (isSelected) AccentPrimary else Color.Transparent)
+                        .clickable { onValueSelected(value) }
+                        .padding(vertical = 10.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = display,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = if (isSelected) Color.White else TextSecondary,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                    )
+                }
+                if (index < options.size - 1 && !isSelected && selectedValue != options[index+1].first) {
+                    Box(
+                        modifier = Modifier
+                            .width(1.dp)
+                            .height(24.dp)
+                            .align(Alignment.CenterVertically)
+                            .background(BorderColor)
+                    )
+                }
+            }
+        }
     }
 }

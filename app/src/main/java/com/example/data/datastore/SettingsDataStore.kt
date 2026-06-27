@@ -29,6 +29,7 @@ class SettingsDataStore(private val context: Context) {
         val PANEL_SIDE = stringPreferencesKey("panel_side")
         val PANEL_Y_POSITION = intPreferencesKey("panel_y_position")
         val TOUCHPAD_SIZE = stringPreferencesKey("touchpad_size")
+        val PANEL_COLOR = stringPreferencesKey("panel_color")
         
         val LONG_CLICK_MS = intPreferencesKey("long_click_ms")
         val DOUBLE_CLICK_MS = intPreferencesKey("double_click_ms")
@@ -68,6 +69,7 @@ class SettingsDataStore(private val context: Context) {
     val panelSideFlow: Flow<String> = context.dataStore.data.map { it[PANEL_SIDE] ?: "RIGHT" }
     val panelYPositionFlow: Flow<Int> = context.dataStore.data.map { it[PANEL_Y_POSITION] ?: -1 } // -1 means center
     val touchpadSizeFlow: Flow<String> = context.dataStore.data.map { it[TOUCHPAD_SIZE] ?: "MEDIUM" }
+    val panelColorFlow: Flow<String> = context.dataStore.data.map { it[PANEL_COLOR] ?: "DEFAULT" }
 
     val longClickMsFlow: Flow<Int> = context.dataStore.data.map { it[LONG_CLICK_MS] ?: 800 }
     val doubleClickMsFlow: Flow<Int> = context.dataStore.data.map { it[DOUBLE_CLICK_MS] ?: 130 }
@@ -133,6 +135,7 @@ class SettingsDataStore(private val context: Context) {
     suspend fun updatePanelSide(side: String) = context.dataStore.edit { it[PANEL_SIDE] = side }
     suspend fun updatePanelYPosition(y: Int) = context.dataStore.edit { it[PANEL_Y_POSITION] = y }
     suspend fun updateTouchpadSize(size: String) = context.dataStore.edit { it[TOUCHPAD_SIZE] = size }
+    suspend fun updatePanelColor(color: String) = context.dataStore.edit { it[PANEL_COLOR] = color }
 
     suspend fun updateLongClickMs(ms: Int) = context.dataStore.edit { it[LONG_CLICK_MS] = ms }
     suspend fun updateDoubleClickMs(ms: Int) = context.dataStore.edit { it[DOUBLE_CLICK_MS] = ms }

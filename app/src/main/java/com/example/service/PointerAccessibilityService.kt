@@ -14,6 +14,7 @@ class PointerAccessibilityService : AccessibilityService() {
 
     private val serviceScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var lastNodeJob: Job? = null
+    private var lastUpdateTime = 0L
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -35,14 +36,28 @@ class PointerAccessibilityService : AccessibilityService() {
     }
 
     fun onCursorMoved(x: Int, y: Int) {
-        // Throttled node lookup: only query when the cursor has stopped moving (idle for 250ms)
-        lastNodeJob?.cancel()
-        lastNodeJob = serviceScope.launch {
-            delay(250) // Debounce for 250ms to completely prevent CPU overhead during continuous drags
-            if (!PointerServiceCoordinator.isDragMode.value && !PointerServiceCoordinator.isScrollMode.value) {
-                val result = detectShapeAtPoint(x, y)
-                withContext(Dispatchers.Main) {
-                    PointerServiceCoordinator.updateCursorShape(result.first, result.second)
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastUpdateTime >= 50) { // Throttled node lookup: 50ms interval (20 updates/sec) for super-fast PC feeling
+            lastUpdateTime = currentTime
+            lastNodeJob?.cancel()
+            lastNodeJob = serviceScope.launch {
+                if (!PointerServiceCoordinator.isDragMode.value && !PointerServiceCoordinator.isScrollMode.value) {
+                    val result = detectShapeAtPoint(x, y)
+                    withContext(Dispatchers.Main) {
+                        PointerServiceCoordinator.updateCursorShape(result.first, result.second)
+                    }
+                }
+            }
+        } else {
+            // Ensure the final hover state is captured when the cursor stops moving
+            lastNodeJob?.cancel()
+            lastNodeJob = serviceScope.launch {
+                delay(60) // Short delay to capture final rested position
+                if (!PointerServiceCoordinator.isDragMode.value && !PointerServiceCoordinator.isScrollMode.value) {
+                    val result = detectShapeAtPoint(x, y)
+                    withContext(Dispatchers.Main) {
+                        PointerServiceCoordinator.updateCursorShape(result.first, result.second)
+                    }
                 }
             }
         }

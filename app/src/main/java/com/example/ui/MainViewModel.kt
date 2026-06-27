@@ -62,6 +62,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val panelAlpha: StateFlow<Float> = dataStore.panelAlphaFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.9f)
 
+    val panelSize: StateFlow<String> = dataStore.panelSizeFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "MEDIUM")
+
+    val panelColor: StateFlow<String> = dataStore.panelColorFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "DEFAULT")
+
     val vibration: StateFlow<Boolean> = dataStore.vibrationFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
@@ -134,6 +140,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun updatePanelAlpha(alpha: Float) {
         viewModelScope.launch { dataStore.updatePanelAlpha(alpha) }
+    }
+
+    fun updatePanelSize(size: String) {
+        viewModelScope.launch { dataStore.updatePanelSize(size) }
+    }
+
+    fun updatePanelColor(color: String) {
+        viewModelScope.launch { dataStore.updatePanelColor(color) }
     }
 
     fun updateVibration(enabled: Boolean) {

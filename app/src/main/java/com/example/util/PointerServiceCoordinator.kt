@@ -129,4 +129,17 @@ object PointerServiceCoordinator {
     fun requestRecents() {
         accessibilityService?.performRecents()
     }
+
+    fun getRealScreenSize(context: Context): Pair<Int, Int> {
+        val wm = context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager
+        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            val bounds = wm.currentWindowMetrics.bounds
+            Pair(bounds.width(), bounds.height())
+        } else {
+            val metrics = android.util.DisplayMetrics()
+            @Suppress("DEPRECATION")
+            wm.defaultDisplay.getRealMetrics(metrics)
+            Pair(metrics.widthPixels, metrics.heightPixels)
+        }
+    }
 }

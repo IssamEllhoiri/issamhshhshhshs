@@ -43,17 +43,21 @@ class FloatingPanelView(
     private var isExpanded = false
 
     // Dimensions
-    private val collapsedWidth = (18 * density).toInt()
-    private val collapsedHeight = (60 * density).toInt()
-    private val expandedWidth = (260 * density).toInt()
-    private val expandedHeight = (380 * density).toInt()
+    private var collapsedWidth = (18 * density).toInt()
+    private var collapsedHeight = (60 * density).toInt()
+    private var expandedWidth = (260 * density).toInt()
+    private var expandedHeight = (380 * density).toInt()
 
     private lateinit var collapsedView: CollapsedView
     private lateinit var expandedView: ExpandedView
     
     // Compact mode for hiding button grid and showing touchpad only
     private var isCompactMode = false
-    private val compactExpandedHeight by lazy { (196 * density).toInt() }
+    private var compactExpandedHeight = (196 * density).toInt()
+
+    // Scaling and Color settings fields
+    private var scaleFactor = 1.0f
+    private var panelColorTheme = "DEFAULT"
 
     // Touch variables for dragging the entire panel
     private var initialX = 0
@@ -126,6 +130,65 @@ class FloatingPanelView(
                 longClickMs = it
             }
         }
+        scope.launch {
+            dataStore.panelSizeFlow.collect { size ->
+                updatePanelScale(size)
+            }
+        }
+        scope.launch {
+            dataStore.panelColorFlow.collect { color ->
+                panelColorTheme = color
+                collapsedView.invalidate()
+                expandedView.invalidate()
+            }
+        }
+    }
+
+    private fun updatePanelScale(size: String) {
+        scaleFactor = when (size.uppercase()) {
+            "SMALL" -> 0.8f
+            "LARGE" -> 1.2f
+            else -> 1.0f // MEDIUM
+        }
+
+        collapsedWidth = (18 * density * scaleFactor).toInt()
+        collapsedHeight = (60 * density * scaleFactor).toInt()
+        expandedWidth = (260 * density * scaleFactor).toInt()
+        expandedHeight = (380 * density * scaleFactor).toInt()
+        compactExpandedHeight = (196 * density * scaleFactor).toInt()
+
+        collapsedView.layoutParams = LayoutParams(collapsedWidth, collapsedHeight).apply {
+            gravity = Gravity.CENTER
+        }
+
+        expandedView.layoutParams = LayoutParams(expandedWidth, expandedHeight)
+
+        // Scale the views
+        collapsedView.scaleX = scaleFactor
+        collapsedView.scaleY = scaleFactor
+        expandedView.scaleX = scaleFactor
+        expandedView.scaleY = scaleFactor
+
+        collapsedView.pivotX = collapsedWidth / 2f
+        collapsedView.pivotY = collapsedHeight / 2f
+        expandedView.pivotX = expandedWidth / 2f
+        expandedView.pivotY = expandedHeight / 2f
+
+        val targetW = if (isExpanded) expandedWidth else collapsedWidth
+        val targetH = if (isExpanded) {
+            if (isCompactMode) compactExpandedHeight else expandedHeight
+        } else {
+            collapsedHeight
+        }
+
+        parentParams.width = targetW
+        parentParams.height = targetH
+
+        try {
+            windowManager.updateViewLayout(this, parentParams)
+        } catch (e: Exception) {}
+
+        requestLayout()
     }
 
     fun toggleCompactMode() {
@@ -162,11 +225,11 @@ class FloatingPanelView(
                 parentParams.x = (initialX + dx).toInt()
                 parentParams.y = (initialY + dy).toInt()
                 
-                // Constrain vertical position
-                val displayMetrics = resources.displayMetrics
-                val screenHeight = displayMetrics.heightPixels
+                // Constrain vertical position using real physical screen bounds and dynamic panel height
+                val (screenWidth, screenHeight) = PointerServiceCoordinator.getRealScreenSize(context)
                 val limitTop = (20 * density).toInt()
-                val limitBottom = screenHeight - expandedHeight - (20 * density).toInt()
+                val currentPanelHeight = parentParams.height
+                val limitBottom = screenHeight - currentPanelHeight - (20 * density).toInt()
                 parentParams.y = parentParams.y.coerceIn(limitTop, limitBottom)
 
                 windowManager.updateViewLayout(this, parentParams)
@@ -351,9 +414,9 @@ class FloatingPanelView(
                         PointerServiceCoordinator.requestScroll(0f, dy * scrollMultiplier)
                     } else {
                         // Move Mouse mode
-                        val displayMetrics = resources.displayMetrics
-                        val screenWidth = displayMetrics.widthPixels.toFloat()
-                        val screenHeight = displayMetrics.heightPixels.toFloat()
+                        val (sW, sH) = PointerServiceCoordinator.getRealScreenSize(context)
+                        val screenWidth = sW.toFloat()
+                        val screenHeight = sH.toFloat()
 
                         var newCursorX = PointerServiceCoordinator.cursorX.value + dx
                         var newCursorY = PointerServiceCoordinator.cursorY.value + dy
@@ -663,7 +726,12 @@ class FloatingPanelView(
 
             // 1. Background
             val paintBg = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.parseColor("#CC12121A") // 80% opacity
+                color = when (panelColorTheme.uppercase()) {
+                    "BLACK" -> Color.parseColor("#CC000000") // 80% opacity pitch black
+                    "BLUE" -> Color.parseColor("#CC0A192F")  // 80% opacity deep navy
+                    "RED" -> Color.parseColor("#CC2B1212")   // 80% opacity deep crimson
+                    else -> Color.parseColor("#CC12121A")    // 80% opacity slate (Default)
+                }
                 style = Paint.Style.FILL
             }
             val rect = RectF(0f, 0f, w, h)
@@ -671,7 +739,12 @@ class FloatingPanelView(
 
             // 2. Outline border
             val paintBorder = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.parseColor("#2A2A3C")
+                color = when (panelColorTheme.uppercase()) {
+                    "BLACK" -> Color.parseColor("#444444")
+                    "BLUE" -> Color.parseColor("#172A45")
+                    "RED" -> Color.parseColor("#401F1F")
+                    else -> Color.parseColor("#2A2A3C")
+                }
                 style = Paint.Style.STROKE
                 strokeWidth = 1f * density
             }
@@ -930,7 +1003,12 @@ class FloatingPanelView(
 
             // Draw primary background card
             val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.parseColor("#E612121A") // 90% opacity dark slate
+                color = when (panelColorTheme.uppercase()) {
+                    "BLACK" -> Color.parseColor("#E6000000") // 90% opacity pitch black
+                    "BLUE" -> Color.parseColor("#E60A192F")  // 90% opacity deep navy
+                    "RED" -> Color.parseColor("#E62B1212")   // 90% opacity deep crimson
+                    else -> Color.parseColor("#E612121A")    // 90% opacity slate (Default)
+                }
                 style = Paint.Style.FILL
             }
             val rect = RectF(0f, 0f, w, h)
@@ -938,7 +1016,12 @@ class FloatingPanelView(
 
             // Draw glowing subtle accent border
             val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.parseColor("#2A2A3C")
+                color = when (panelColorTheme.uppercase()) {
+                    "BLACK" -> Color.parseColor("#444444")
+                    "BLUE" -> Color.parseColor("#172A45")
+                    "RED" -> Color.parseColor("#401F1F")
+                    else -> Color.parseColor("#2A2A3C")
+                }
                 style = Paint.Style.STROKE
                 strokeWidth = 1f * density
             }
@@ -946,7 +1029,12 @@ class FloatingPanelView(
 
             // Draw title bar split line
             val splitPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.parseColor("#1C1C28")
+                color = when (panelColorTheme.uppercase()) {
+                    "BLACK" -> Color.parseColor("#222222")
+                    "BLUE" -> Color.parseColor("#1F4068")
+                    "RED" -> Color.parseColor("#5C2E2E")
+                    else -> Color.parseColor("#1C1C28")
+                }
                 strokeWidth = 1f * density
             }
             canvas.drawLine(0f, 40f * density, w, 40f * density, splitPaint)
