@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -220,30 +221,37 @@ fun SettingsTab(viewModel: MainViewModel) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 val defaultShapeOptions = listOf(
-                    "DEFAULT" to "Classic Arrow",
-                    "CROSSHAIR" to "Crosshair",
-                    "WAIT" to "Waiting Spinner (Animated)",
-                    "TEXT" to "I-Beam Text Selector",
-                    "GRAB" to "Grab Hand (Open)",
-                    "POINTER" to "Pointer Hand (Selection)",
-                    "RESIZE_H" to "Horizontal Resize Arrow",
-                    "RESIZE_V" to "Vertical Resize Arrow"
+                    "DEFAULT" to "السهم الكلاسيكي (Classic)",
+                    "MODERN_ARROW" to "سهم عصري حاد وعالي الدقة (Modern Sharp)",
+                    "FUTURISTIC_DELTA" to "مؤشر الطائرة الشبح المستقبلية (Stealth Delta)",
+                    "PRECISION_DOT" to "نقطة التصويب فائقة الدقة (Precision Target Dot)",
+                    "CROSSHAIR" to "علامة الزائد للتصويب (Crosshair)",
+                    "WAIT" to "مؤشر الانتظار الدوار المتحرك (Spinner)",
+                    "TEXT" to "مؤشر تحديد النصوص (I-Beam Text)",
+                    "GRAB" to "اليد المفتوحة للإمساك (Grab Hand)",
+                    "POINTER" to "يد التحديد والنقر (Pointer Hand)",
+                    "RESIZE_H" to "سهم التوسيع الأفقي (Resize Horizontal)",
+                    "RESIZE_V" to "سهم التوسيع العمودي (Resize Vertical)"
                 )
 
                 val textShapeOptions = listOf(
-                    "TEXT" to "I-Beam Text Selector",
-                    "DEFAULT" to "Classic Arrow",
-                    "CROSSHAIR" to "Crosshair",
-                    "WAIT" to "Waiting Spinner (Animated)",
-                    "POINTER" to "Pointer Hand (Selection)"
+                    "TEXT" to "مؤشر تحديد النصوص (I-Beam Text)",
+                    "PRECISION_DOT" to "نقطة التصويب فائقة الدقة (Precision Target Dot)",
+                    "DEFAULT" to "السهم الكلاسيكي (Classic)",
+                    "MODERN_ARROW" to "سهم عصري حاد وعالي الدقة (Modern Sharp)",
+                    "CROSSHAIR" to "علامة الزائد للتصويب (Crosshair)",
+                    "WAIT" to "مؤشر الانتظار الدوار المتحرك (Spinner)",
+                    "POINTER" to "يد التحديد والنقر (Pointer Hand)"
                 )
 
                 val hoverShapeOptions = listOf(
-                    "POINTER" to "Pointer Hand (Selection)",
-                    "DEFAULT" to "Classic Arrow",
-                    "CROSSHAIR" to "Crosshair",
-                    "GRAB" to "Grab Hand (Open)",
-                    "NOT_ALLOWED" to "Blocked / Not Allowed"
+                    "POINTER" to "يد التحديد والنقر (Pointer Hand)",
+                    "MODERN_ARROW" to "سهم عصري حاد وعالي الدقة (Modern Sharp)",
+                    "FUTURISTIC_DELTA" to "مؤشر الطائرة الشبح المستقبلية (Stealth Delta)",
+                    "DEFAULT" to "السهم الكلاسيكي (Classic)",
+                    "CROSSHAIR" to "علامة الزائد للتصويب (Crosshair)",
+                    "GRAB" to "اليد المفتوحة للإمساك (Grab Hand)",
+                    "NOT_ALLOWED" to "مؤشر ممنوع / غير مسموح (Not Allowed)"
                 )
 
                 // 1. Default cursor
@@ -313,7 +321,7 @@ fun SettingsTab(viewModel: MainViewModel) {
         }
 
         // --- SECTION 1.5: CURSOR HIGHLIGHT SETTINGS ---
-        SettingsSectionHeader(title = "Cursor Highlight & Border Ring")
+        SettingsSectionHeader(title = "تحديد حواف المؤشر (الحدود Outline)")
         Card(
             colors = CardDefaults.cardColors(containerColor = BgTertiary),
             shape = RoundedCornerShape(16.dp),
@@ -322,7 +330,7 @@ fun SettingsTab(viewModel: MainViewModel) {
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 SettingsToggleRow(
-                    title = "Enable Cursor Highlight Ring",
+                    title = "تفعيل تحديد حواف المؤشر (Stroke)",
                     checked = cursorHighlightEnabled,
                     onCheckedChange = { viewModel.updateCursorHighlightEnabled(it) }
                 )
@@ -331,7 +339,7 @@ fun SettingsTab(viewModel: MainViewModel) {
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "Highlight Ring Thickness ($cursorHighlightThickness dp)",
+                        text = "سمك تحديد حواف المؤشر ($cursorHighlightThickness dp)",
                         style = MaterialTheme.typography.bodyMedium,
                         color = TextPrimary
                     )
@@ -348,15 +356,27 @@ fun SettingsTab(viewModel: MainViewModel) {
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "Highlight Ring Color",
+                        text = "لون تحديد حواف المؤشر",
                         style = MaterialTheme.typography.bodyMedium,
                         color = TextPrimary
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
                     ) {
+                        ColorPickerButton(
+                            colorName = "BLACK",
+                            colorVal = Color(0xFF000000),
+                            isSelected = cursorHighlightColor == "BLACK",
+                            onClick = { viewModel.updateCursorHighlightColor("BLACK") }
+                        )
+                        ColorPickerButton(
+                            colorName = "WHITE",
+                            colorVal = Color(0xFFEEEEF8),
+                            isSelected = cursorHighlightColor == "WHITE",
+                            onClick = { viewModel.updateCursorHighlightColor("WHITE") }
+                        )
                         ColorPickerButton(
                             colorName = "PURPLE",
                             colorVal = Color(0xFF6C63FF),
@@ -386,12 +406,6 @@ fun SettingsTab(viewModel: MainViewModel) {
                             colorVal = Color(0xFF4CAF50),
                             isSelected = cursorHighlightColor == "GREEN",
                             onClick = { viewModel.updateCursorHighlightColor("GREEN") }
-                        )
-                        ColorPickerButton(
-                            colorName = "WHITE",
-                            colorVal = Color(0xFFEEEEF8),
-                            isSelected = cursorHighlightColor == "WHITE",
-                            onClick = { viewModel.updateCursorHighlightColor("WHITE") }
                         )
                     }
                 }

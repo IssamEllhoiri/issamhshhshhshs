@@ -70,7 +70,7 @@ class SettingsDataStore(private val context: Context) {
     
     val cursorHighlightEnabledFlow: Flow<Boolean> = context.dataStore.data.map { it[CURSOR_HIGHLIGHT_ENABLED] ?: false }
     val cursorHighlightThicknessFlow: Flow<Int> = context.dataStore.data.map { it[CURSOR_HIGHLIGHT_THICKNESS] ?: 4 }
-    val cursorHighlightColorFlow: Flow<String> = context.dataStore.data.map { it[CURSOR_HIGHLIGHT_COLOR] ?: "PURPLE" }
+    val cursorHighlightColorFlow: Flow<String> = context.dataStore.data.map { it[CURSOR_HIGHLIGHT_COLOR] ?: "BLACK" }
 
     val panelAlphaFlow: Flow<Float> = context.dataStore.data.map { it[PANEL_ALPHA] ?: 0.9f }
     val panelSizeFlow: Flow<String> = context.dataStore.data.map { it[PANEL_SIZE] ?: "MEDIUM" }

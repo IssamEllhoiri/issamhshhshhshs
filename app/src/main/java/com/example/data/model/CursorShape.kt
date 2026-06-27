@@ -11,5 +11,8 @@ enum class CursorShape {
     GRAB,         // Open hand for drag initiation
     GRABBING,     // Closed hand during drag operation
     NOT_ALLOWED,  // Red circular slash for disabled elements
-    NONE          // Invisible cursor
+    NONE,         // Invisible cursor
+    MODERN_ARROW, // Sleek macOS/Win11 style premium arrow
+    FUTURISTIC_DELTA, // Stealth triangular high-tech delta cursor
+    PRECISION_DOT // Ultra-high precision dot and crosshair target
 }

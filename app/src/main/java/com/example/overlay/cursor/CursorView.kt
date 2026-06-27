@@ -194,17 +194,6 @@ class CursorView @JvmOverloads constructor(
         val hX = hotspotOffset
         val hY = hotspotOffset
 
-        // Draw cursor highlight (halo ring)
-        if (highlightEnabled) {
-            val hPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                style = Paint.Style.STROKE
-                strokeWidth = highlightThicknessPx
-                color = highlightColor
-            }
-            val radius = cursorSizePx * 0.7f
-            canvas.drawCircle(hX, hY, radius, hPaint)
-        }
-
         // 1. Draw click VFX ripple under the cursor
         if (clickRippleAlpha > 0 && clickRippleRadius > 0f) {
             vfxPaint.alpha = clickRippleAlpha
@@ -244,11 +233,11 @@ class CursorView @JvmOverloads constructor(
         canvas.save()
         
         // Match hotspot alignment
-        // Center-aligned: TEXT, CROSSHAIR, WAIT, RESIZE_H, RESIZE_V
-        // Top-Left aligned: DEFAULT, POINTER, GRAB, GRABBING, NOT_ALLOWED
+        // Center-aligned: TEXT, CROSSHAIR, WAIT, RESIZE_H, RESIZE_V, PRECISION_DOT
+        // Top-Left aligned: DEFAULT, POINTER, GRAB, GRABBING, NOT_ALLOWED, MODERN_ARROW, FUTURISTIC_DELTA
         val isCenterAligned = when (cursorShape) {
             CursorShape.TEXT, CursorShape.CROSSHAIR, CursorShape.WAIT, 
-            CursorShape.RESIZE_H, CursorShape.RESIZE_V -> true
+            CursorShape.RESIZE_H, CursorShape.RESIZE_V, CursorShape.PRECISION_DOT -> true
             else -> false
         }
 
@@ -260,6 +249,17 @@ class CursorView @JvmOverloads constructor(
         }
 
         val scale = cursorSizePx / (24f * resources.displayMetrics.density)
+        
+        // Dynamic outline stroke styling directly on the cursor path
+        if (highlightEnabled) {
+            strokePaint.color = highlightColor
+            // Compensate for canvas scale so the stroke width matches selected thickness in pixels
+            strokePaint.strokeWidth = highlightThicknessPx / scale
+        } else {
+            strokePaint.color = cursorColor
+            strokePaint.strokeWidth = (1.5f * resources.displayMetrics.density) / scale
+        }
+
         canvas.scale(scale, scale)
 
         fillPaint.color = cursorColor
@@ -275,6 +275,9 @@ class CursorView @JvmOverloads constructor(
             CursorShape.GRAB -> drawGrabHand(canvas)
             CursorShape.GRABBING -> drawGrabbingHand(canvas)
             CursorShape.NOT_ALLOWED -> drawNotAllowedCursor(canvas)
+            CursorShape.MODERN_ARROW -> drawModernArrow(canvas)
+            CursorShape.FUTURISTIC_DELTA -> drawFuturisticDelta(canvas)
+            CursorShape.PRECISION_DOT -> drawPrecisionDot(canvas)
             else -> {}
         }
 
@@ -497,5 +500,49 @@ class CursorView @JvmOverloads constructor(
         canvas.drawCircle(0f, 0f, 9f, paint)
         // Draw diagonal line
         canvas.drawLine(-6.3f, -6.3f, 6.3f, 6.3f, paint)
+    }
+
+    private fun drawModernArrow(canvas: Canvas) {
+        val path = Path().apply {
+            moveTo(0f, 0f)
+            lineTo(0f, 21f)
+            lineTo(5.5f, 15.5f)
+            lineTo(10.5f, 25f)
+            lineTo(13.2f, 23.5f)
+            lineTo(8.2f, 14.2f)
+            lineTo(14.5f, 14.2f)
+            close()
+        }
+        canvas.drawPath(path, fillPaint)
+        canvas.drawPath(path, strokePaint)
+    }
+
+    private fun drawFuturisticDelta(canvas: Canvas) {
+        val path = Path().apply {
+            moveTo(0f, 0f)
+            lineTo(11f, 17f)
+            lineTo(5f, 13f)
+            lineTo(0f, 21f)
+            lineTo(-5f, 13f)
+            lineTo(-11f, 17f)
+            close()
+        }
+        canvas.drawPath(path, fillPaint)
+        canvas.drawPath(path, strokePaint)
+    }
+
+    private fun drawPrecisionDot(canvas: Canvas) {
+        // High-precision outer target ring and small inner dot
+        // Center is at 0, 0 because isCenterAligned is true
+        canvas.drawCircle(0f, 0f, 3f, fillPaint)
+        
+        // Outer target circle
+        canvas.drawCircle(0f, 0f, 8f, strokePaint)
+        
+        // Tiny crosshairs extending from the outer circle
+        canvas.drawLine(-12f, 0f, -8f, 0f, strokePaint)
+        canvas.drawLine(8f, 0f, 12f, 0f, strokePaint)
+        canvas.drawLine(0f, -12f, 0f, -8f, strokePaint)
+        canvas.drawLine(0f, 8f, 0f, 12f, strokePaint)
     }
 }
