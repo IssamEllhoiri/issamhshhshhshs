@@ -35,23 +35,20 @@ fun HomeTab(
     onToggleService: (Boolean) -> Unit
 ) {
     val isRunning by viewModel.isOverlayActive.collectAsState()
-    val clicks by viewModel.clicksToday.collectAsState()
-    val drags by viewModel.dragCount.collectAsState()
-    val distance by viewModel.pointerDistance.collectAsState()
 
     // Central tips list
     val tipsList = remember {
         listOf(
-            "يمكنك سحب شريط العنوان في اللوحة العائمة لنقلها لأي موضع تريده.",
-            "فعل وضع SCROLL واسحب إصبعك على منطقة اللمس للتمرير العمودي السلس.",
-            "تلتصق اللوحة العائمة تلقائياً بحواف الشاشة اليسرى أو اليمنى بمجرد إفلاتها.",
-            "اضغط DRAG لتفعيل وضع السحب، ثم انقر مرتين لتحديد البداية والنهاية.",
-            "يمكنك تغيير ألوان المؤشر (بنفسجي، أزرق، أحمر) من شاشة الإعدادات مباشرة.",
-            "عند تفعيل موفر البطارية، ينخفض معدل تحديث إطارات المؤشر لتوفير الطاقة.",
-            "يدعم التطبيق التشغيل التلقائي الآمن مع إقلاع هاتفك دون تدخل منك.",
-            "انقر LNG-CLK لتنفيذ نقرة طويلة (مثالية للرموز والوسائط والتحديد).",
-            "انقر KBD في الأزرار لإظهار أو إخفاء الكيبورد الافتراضي بمرونة.",
-            "تحقق من إعدادات شدة الاهتزاز إذا كنت تفضل تغذية راجعة لمسية قوية."
+            "You can drag the title bar of the floating panel to move it anywhere on the screen.",
+            "Activate SCROLL mode and swipe on the touchpad for smooth vertical scrolling.",
+            "The floating panel automatically snaps to the left or right edge of the screen upon release.",
+            "Click DRAG to enable dragging, then tap on the touchpad to set start and end points.",
+            "You can change cursor colors (White, Purple, Blue) directly from the Settings screen.",
+            "When battery saver is enabled, cursor update rates are optimized to save power.",
+            "The app supports secure auto-start on boot to keep your mouse ready.",
+            "Click LNG-CLK to perform a long click (perfect for context menus and media).",
+            "Click KBD to toggle the soft keyboard on screen whenever you need to type.",
+            "Check the vibration intensity setting in Settings if you prefer strong haptic feedback."
         )
     }
 
@@ -109,7 +106,7 @@ fun HomeTab(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = if (isRunning) "حالة التشغيل: مفعّل" else "حالة التشغيل: متوقف",
+                        text = if (isRunning) "Service Status: Active" else "Service Status: Stopped",
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                             color = TextPrimary
@@ -139,9 +136,9 @@ fun HomeTab(
 
                 Text(
                     text = if (isRunning) 
-                        "المؤشر العائم ولوحة التحكم جاهزان للاستخدام. انقر هنا للإيقاف." 
+                        "The floating cursor and control panel are active. Tap here to stop." 
                     else 
-                        "انقر هنا لتفعيل الماوس واللوحة العائمة فوراً فوق جميع التطبيقات.",
+                        "Tap here to enable the floating mouse cursor and panel over all applications.",
                     style = MaterialTheme.typography.bodySmall.copy(
                         color = if (isRunning) TextPrimary.copy(alpha = 0.8f) else TextSecondary,
                         lineHeight = 16.sp
@@ -152,7 +149,7 @@ fun HomeTab(
 
         // 2. Statistics Grid (2x2)
         Text(
-            text = "إحصائيات الجلسة الحالية",
+            text = "Current Session Status",
             style = MaterialTheme.typography.titleSmall.copy(
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary
@@ -165,15 +162,15 @@ fun HomeTab(
         ) {
             StatCard(
                 modifier = Modifier.weight(1f),
-                title = "نقرات اليوم",
-                value = "$clicks",
+                title = "Click Speed",
+                value = "Instant (15ms)",
                 icon = Icons.Default.Star,
                 accentColor = SuccessColor
             )
             StatCard(
                 modifier = Modifier.weight(1f),
-                title = "عمليات السحب",
-                value = "$drags",
+                title = "Cursor Engine",
+                value = "V2 Optimized",
                 icon = Icons.Default.PlayArrow,
                 accentColor = InfoColor
             )
@@ -185,15 +182,15 @@ fun HomeTab(
         ) {
             StatCard(
                 modifier = Modifier.weight(1f),
-                title = "مسافة المؤشر",
-                value = String.format("%.1f م", distance * 0.026), // Pixel travel converted roughly to meters
+                title = "Performance",
+                value = "Lightweight",
                 icon = Icons.Default.Check,
                 accentColor = WarningColor
             )
             StatCard(
                 modifier = Modifier.weight(1f),
-                title = "لغة التطبيق",
-                value = "عربي",
+                title = "App Language",
+                value = "English",
                 icon = Icons.Default.Menu,
                 accentColor = AccentSecondary
             )
@@ -201,7 +198,7 @@ fun HomeTab(
 
         // 3. Quick Access Shortcut Row
         Text(
-            text = "تخصيص سريع مجسم",
+            text = "Quick Customization",
             style = MaterialTheme.typography.titleSmall.copy(
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary
@@ -219,7 +216,7 @@ fun HomeTab(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             QuickAccessItem(
-                label = "حجم المؤشر: $sizePreference",
+                label = "Cursor Size: $sizePreference",
                 icon = Icons.Default.Home,
                 onClick = {
                     val nextSize = when (sizePreference) {
@@ -232,7 +229,7 @@ fun HomeTab(
             )
 
             QuickAccessItem(
-                label = "حساسية الحركة: ${String.format("%.1f", sensitivityPreference)}",
+                label = "Sensitivity: ${String.format("%.1f", sensitivityPreference)}",
                 icon = Icons.Default.PlayArrow,
                 onClick = {
                     val nextSensitivity = when (sensitivityPreference) {
@@ -245,7 +242,7 @@ fun HomeTab(
             )
 
             QuickAccessItem(
-                label = "اللون: $colorPreference",
+                label = "Color: $colorPreference",
                 icon = Icons.Default.Favorite,
                 onClick = {
                     val nextColor = when (colorPreference) {
@@ -289,7 +286,7 @@ fun HomeTab(
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "نصيحة الاستخدام الذكي",
+                        text = "Smart Usage Tip",
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontWeight = FontWeight.Bold,
                             color = TextPrimary

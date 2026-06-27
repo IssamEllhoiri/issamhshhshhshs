@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">PointerX</string>
-    <string name="accessibility_service_description">خدمة PointerX للتحكم بالمؤشر وتنفيذ نقرات الكليك، السحب، والتمرير التلقائي بأمان كامل.</string>
+    <string name="accessibility_service_description">PointerX accessibility service for cursor control, auto-clicking, dragging, and smooth scrolling.</string>
 </resources>

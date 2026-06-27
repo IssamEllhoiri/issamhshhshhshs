@@ -68,7 +68,7 @@ fun SettingsTab(viewModel: MainViewModel) {
         Spacer(modifier = Modifier.height(4.dp))
 
         // --- SECTION 1: CURSOR SETTINGS ---
-        SettingsSectionHeader(title = "إعدادات المؤشر والمظهر")
+        SettingsSectionHeader(title = "Cursor & Appearance Settings")
         Card(
             colors = CardDefaults.cardColors(containerColor = BgTertiary),
             shape = RoundedCornerShape(16.dp),
@@ -77,7 +77,7 @@ fun SettingsTab(viewModel: MainViewModel) {
             Column(modifier = Modifier.padding(16.dp)) {
                 // Size
                 Text(
-                    text = "حجم المؤشر ($cursorSize dp)",
+                    text = "Cursor Size ($cursorSize dp)",
                     style = MaterialTheme.typography.bodyMedium,
                     color = TextPrimary
                 )
@@ -95,7 +95,7 @@ fun SettingsTab(viewModel: MainViewModel) {
 
                 // Sensitivity
                 Text(
-                    text = "الحساسية (${String.format("%.1f", cursorSensitivity)})",
+                    text = "Sensitivity (${String.format("%.1f", cursorSensitivity)})",
                     style = MaterialTheme.typography.bodyMedium,
                     color = TextPrimary
                 )
@@ -113,7 +113,7 @@ fun SettingsTab(viewModel: MainViewModel) {
 
                 // Color Picker Grid
                 Text(
-                    text = "لون المؤشر",
+                    text = "Cursor Color",
                     style = MaterialTheme.typography.bodyMedium,
                     color = TextPrimary
                 )
@@ -158,7 +158,7 @@ fun SettingsTab(viewModel: MainViewModel) {
 
                 // Toggle click ripple VFX
                 SettingsToggleRow(
-                    title = "تأثير النقر البصري (Ripple Effect)",
+                    title = "Visual Click VFX (Ripple Effect)",
                     checked = cursorClickVfx,
                     onCheckedChange = { viewModel.updateCursorClickVfx(it) }
                 )
@@ -166,7 +166,7 @@ fun SettingsTab(viewModel: MainViewModel) {
                 if (cursorClickVfx) {
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = "لون تأثير النقر",
+                        text = "Click VFX Color",
                         style = MaterialTheme.typography.bodyMedium,
                         color = TextPrimary
                     )
@@ -217,42 +217,42 @@ fun SettingsTab(viewModel: MainViewModel) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 val defaultShapeOptions = listOf(
-                    "DEFAULT" to "سهم كلاسيكي (Arrow)",
-                    "CROSSHAIR" to "رمز التقاطع (Crosshair)",
-                    "WAIT" to "حلقة انتظار متحركة (Wait)",
-                    "TEXT" to "مؤشر كتابة النصوص (Text)",
-                    "GRAB" to "يد مفتوحة للسحب (Grab)",
-                    "POINTER" to "يد التحديد (Pointer)",
-                    "RESIZE_H" to "سهم تغيير الحجم الأفقي",
-                    "RESIZE_V" to "سهم تغيير الحجم العمودي"
+                    "DEFAULT" to "Classic Arrow",
+                    "CROSSHAIR" to "Crosshair",
+                    "WAIT" to "Waiting Spinner (Animated)",
+                    "TEXT" to "I-Beam Text Selector",
+                    "GRAB" to "Grab Hand (Open)",
+                    "POINTER" to "Pointer Hand (Selection)",
+                    "RESIZE_H" to "Horizontal Resize Arrow",
+                    "RESIZE_V" to "Vertical Resize Arrow"
                 )
 
                 val textShapeOptions = listOf(
-                    "TEXT" to "مؤشر كتابة النصوص (Text)",
-                    "DEFAULT" to "سهم كلاسيكي (Arrow)",
-                    "CROSSHAIR" to "رمز التقاطع (Crosshair)",
-                    "WAIT" to "حلقة انتظار متحركة (Wait)",
-                    "POINTER" to "يد التحديد (Pointer)"
+                    "TEXT" to "I-Beam Text Selector",
+                    "DEFAULT" to "Classic Arrow",
+                    "CROSSHAIR" to "Crosshair",
+                    "WAIT" to "Waiting Spinner (Animated)",
+                    "POINTER" to "Pointer Hand (Selection)"
                 )
 
                 val hoverShapeOptions = listOf(
-                    "POINTER" to "يد التحديد (Pointer)",
-                    "DEFAULT" to "سهم كلاسيكي (Arrow)",
-                    "CROSSHAIR" to "رمز التقاطع (Crosshair)",
-                    "GRAB" to "يد مفتوحة للسحب (Grab)",
-                    "NOT_ALLOWED" to "رمز المنع الأحمر"
+                    "POINTER" to "Pointer Hand (Selection)",
+                    "DEFAULT" to "Classic Arrow",
+                    "CROSSHAIR" to "Crosshair",
+                    "GRAB" to "Grab Hand (Open)",
+                    "NOT_ALLOWED" to "Blocked / Not Allowed"
                 )
 
                 // 1. Default cursor
                 ShapeDropdownSelector(
-                    label = "شكل المؤشر الافتراضي (العام)",
+                    label = "Default Cursor Shape (General)",
                     selectedValue = defaultCursorShape,
                     options = defaultShapeOptions,
                     onValueSelected = { viewModel.updateDefaultCursorShape(it) }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 CustomImagePickerSection(
-                    label = "صورة مخصصة للمؤشر الافتراضي",
+                    label = "Custom Image for Default Cursor",
                     currentPath = defaultCursorImage,
                     onImageSelected = { uri ->
                         coroutineScope.launch(Dispatchers.IO) {
@@ -267,14 +267,14 @@ fun SettingsTab(viewModel: MainViewModel) {
 
                 // 2. Text cursor
                 ShapeDropdownSelector(
-                    label = "شكل المؤشر عند الكتابة أو البحث (Text)",
+                    label = "Text Hover Cursor Shape (Input & Search)",
                     selectedValue = textCursorShape,
                     options = textShapeOptions,
                     onValueSelected = { viewModel.updateTextCursorShape(it) }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 CustomImagePickerSection(
-                    label = "صورة مخصصة لمؤشر الكتابة والبحث",
+                    label = "Custom Image for Text Input Cursor",
                     currentPath = textCursorImage,
                     onImageSelected = { uri ->
                         coroutineScope.launch(Dispatchers.IO) {
@@ -289,14 +289,14 @@ fun SettingsTab(viewModel: MainViewModel) {
 
                 // 3. Hover cursor
                 ShapeDropdownSelector(
-                    label = "شكل المؤشر عند التحديد (على روابط، تطبيقات، وملفات)",
+                    label = "Selection Hover Cursor Shape (Buttons & Links)",
                     selectedValue = hoverCursorShape,
                     options = hoverShapeOptions,
                     onValueSelected = { viewModel.updateHoverCursorShape(it) }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 CustomImagePickerSection(
-                    label = "صورة مخصصة لمؤشر التحديد والروابط",
+                    label = "Custom Image for Hover Cursor",
                     currentPath = hoverCursorImage,
                     onImageSelected = { uri ->
                         coroutineScope.launch(Dispatchers.IO) {
@@ -310,7 +310,7 @@ fun SettingsTab(viewModel: MainViewModel) {
         }
 
         // --- SECTION 2: FLOATING PANEL SETTINGS ---
-        SettingsSectionHeader(title = "لوحة التحكم العائمة")
+        SettingsSectionHeader(title = "Floating Control Panel")
         Card(
             colors = CardDefaults.cardColors(containerColor = BgTertiary),
             shape = RoundedCornerShape(16.dp),
@@ -319,7 +319,7 @@ fun SettingsTab(viewModel: MainViewModel) {
             Column(modifier = Modifier.padding(16.dp)) {
                 // Transparency Alpha
                 Text(
-                    text = "شفافية اللوحة (${(panelAlpha * 100).toInt()}%)",
+                    text = "Panel Opacity (${(panelAlpha * 100).toInt()}%)",
                     style = MaterialTheme.typography.bodyMedium,
                     color = TextPrimary
                 )
@@ -337,12 +337,12 @@ fun SettingsTab(viewModel: MainViewModel) {
 
                 // Floating Panel Size Setting
                 SegmentedSelector(
-                    label = "حجم اللوحة العائمة",
+                    label = "Floating Panel Size",
                     selectedValue = panelSize,
                     options = listOf(
-                        Pair("SMALL", "صغير"),
-                        Pair("MEDIUM", "متوسط"),
-                        Pair("LARGE", "كبير")
+                        Pair("SMALL", "Small"),
+                        Pair("MEDIUM", "Medium"),
+                        Pair("LARGE", "Large")
                     ),
                     onValueSelected = { viewModel.updatePanelSize(it) }
                 )
@@ -351,7 +351,7 @@ fun SettingsTab(viewModel: MainViewModel) {
 
                 // Floating Panel Color Setting
                 Text(
-                    text = "لون اللوحة العائمة",
+                    text = "Floating Panel Color Theme",
                     style = MaterialTheme.typography.bodyMedium,
                     color = TextPrimary
                 )
@@ -389,7 +389,7 @@ fun SettingsTab(viewModel: MainViewModel) {
         }
 
         // --- SECTION 3: CLICK TIMERS & HAPTICS ---
-        SettingsSectionHeader(title = "إعدادات النقرات والاهتزاز")
+        SettingsSectionHeader(title = "Click & Haptic Settings")
         Card(
             colors = CardDefaults.cardColors(containerColor = BgTertiary),
             shape = RoundedCornerShape(16.dp),
@@ -398,7 +398,7 @@ fun SettingsTab(viewModel: MainViewModel) {
             Column(modifier = Modifier.padding(16.dp)) {
                 // Long Click duration
                 Text(
-                    text = "مدة النقرة الطويلة ($longClickMs ms)",
+                    text = "Long Click Duration ($longClickMs ms)",
                     style = MaterialTheme.typography.bodyMedium,
                     color = TextPrimary
                 )
@@ -416,7 +416,7 @@ fun SettingsTab(viewModel: MainViewModel) {
 
                 // Double Click gap
                 Text(
-                    text = "سرعة النقرة المزدوجة ($doubleClickMs ms)",
+                    text = "Double Click Gap ($doubleClickMs ms)",
                     style = MaterialTheme.typography.bodyMedium,
                     color = TextPrimary
                 )
@@ -434,7 +434,7 @@ fun SettingsTab(viewModel: MainViewModel) {
 
                 // Vibration toggle
                 SettingsToggleRow(
-                    title = "تغذية راجعة لمسية (Vibration)",
+                    title = "Haptic Feedback (Vibration)",
                     checked = vibrationEnabled,
                     onCheckedChange = { viewModel.updateVibration(it) }
                 )
@@ -442,7 +442,7 @@ fun SettingsTab(viewModel: MainViewModel) {
         }
 
         // --- SECTION 4: SCROLL SETTINGS ---
-        SettingsSectionHeader(title = "إعدادات التمرير العمودي")
+        SettingsSectionHeader(title = "Vertical Scroll Settings")
         Card(
             colors = CardDefaults.cardColors(containerColor = BgTertiary),
             shape = RoundedCornerShape(16.dp),
@@ -451,7 +451,7 @@ fun SettingsTab(viewModel: MainViewModel) {
             Column(modifier = Modifier.padding(16.dp)) {
                 // Scroll Speed
                 Text(
-                    text = "سرعة التمرير (${String.format("%.1f", scrollSpeed)}x)",
+                    text = "Scroll Speed (${String.format("%.1f", scrollSpeed)}x)",
                     style = MaterialTheme.typography.bodyMedium,
                     color = TextPrimary
                 )
@@ -468,7 +468,7 @@ fun SettingsTab(viewModel: MainViewModel) {
         }
 
         // --- SECTION 5: SYSTEM & LANGUAGE ---
-        SettingsSectionHeader(title = "إعدادات النظام واللغة")
+        SettingsSectionHeader(title = "System & Language Settings")
         Card(
             colors = CardDefaults.cardColors(containerColor = BgTertiary),
             shape = RoundedCornerShape(16.dp),
@@ -477,7 +477,7 @@ fun SettingsTab(viewModel: MainViewModel) {
             Column(modifier = Modifier.padding(16.dp)) {
                 // Boot completed toggle
                 SettingsToggleRow(
-                    title = "بدء التشغيل تلقائيًا مع الهاتف",
+                    title = "Auto-start mouse service on boot",
                     checked = autoStart,
                     onCheckedChange = { viewModel.updateAutoStart(it) }
                 )
@@ -498,7 +498,7 @@ fun SettingsTab(viewModel: MainViewModel) {
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "إعادة ضبط المصنع للإعدادات",
+                        text = "Reset Settings to Factory Default",
                         color = TextPrimary,
                         fontWeight = FontWeight.Bold
                     )
@@ -513,8 +513,8 @@ fun SettingsTab(viewModel: MainViewModel) {
     if (showResetDialog) {
         AlertDialog(
             onDismissRequest = { showResetDialog = false },
-            title = { Text(text = "تأكيد إعادة الضبط", color = TextPrimary) },
-            text = { Text(text = "هل أنت متأكد من رغبتك في إعادة تعيين كافة قيم الإعدادات المسجلة إلى قيمها الافتراضية؟", color = TextSecondary) },
+            title = { Text(text = "Confirm Reset", color = TextPrimary) },
+            text = { Text(text = "Are you sure you want to restore all configurations and custom cursors back to their factory defaults?", color = TextSecondary) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -522,12 +522,12 @@ fun SettingsTab(viewModel: MainViewModel) {
                         showResetDialog = false
                     }
                 ) {
-                    Text(text = "إعادة ضبط", color = ErrorColor, fontWeight = FontWeight.Bold)
+                    Text(text = "Reset", color = ErrorColor, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showResetDialog = false }) {
-                    Text(text = "إلغاء", color = TextSecondary)
+                    Text(text = "Cancel", color = TextSecondary)
                 }
             },
             containerColor = BgSecondary
@@ -716,7 +716,7 @@ fun CustomImagePickerSection(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "مؤشر مخصص: ${file.name}",
+                        text = "Custom Cursor: ${file.name}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = TextPrimary,
                         maxLines = 1
@@ -725,13 +725,13 @@ fun CustomImagePickerSection(
                 IconButton(onClick = onRemoveImage) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "حذف الصورة",
+                        contentDescription = "Delete custom image",
                         tint = Color.Red
                     )
                 }
             } else {
                 Text(
-                    text = "لم يتم تحديد صورة بعد",
+                    text = "No custom image selected",
                     style = MaterialTheme.typography.bodyMedium,
                     color = TextSecondary,
                     modifier = Modifier.weight(1f)
@@ -743,7 +743,7 @@ fun CustomImagePickerSection(
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
-                        text = "اختر صورة",
+                        text = "Select Image",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.White
                     )

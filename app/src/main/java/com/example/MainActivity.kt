@@ -96,7 +96,7 @@ fun MainAppLayout(viewModel: MainViewModel) {
                         modifier = Modifier.padding(end = 8.dp)
                     ) {
                         Text(
-                            text = if (isRunning) "مفعّل" else "متوقف",
+                            text = if (isRunning) "Active" else "Stopped",
                             color = if (isRunning) SuccessColor else TextSecondary,
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                             modifier = Modifier.padding(end = 8.dp)
@@ -130,7 +130,7 @@ fun MainAppLayout(viewModel: MainViewModel) {
                     selected = currentTab == 0,
                     onClick = { currentTab = 0 },
                     icon = { Icon(imageVector = Icons.Default.Home, contentDescription = null) },
-                    label = { Text(text = "الرئيسية", fontWeight = FontWeight.Bold) },
+                    label = { Text(text = "Home", fontWeight = FontWeight.Bold) },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = TextPrimary,
                         selectedTextColor = TextPrimary,
@@ -144,7 +144,7 @@ fun MainAppLayout(viewModel: MainViewModel) {
                     selected = currentTab == 1,
                     onClick = { currentTab = 1 },
                     icon = { Icon(imageVector = Icons.Default.Settings, contentDescription = null) },
-                    label = { Text(text = "الإعدادات", fontWeight = FontWeight.Bold) },
+                    label = { Text(text = "Settings", fontWeight = FontWeight.Bold) },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = TextPrimary,
                         selectedTextColor = TextPrimary,
@@ -158,7 +158,7 @@ fun MainAppLayout(viewModel: MainViewModel) {
                     selected = currentTab == 2,
                     onClick = { currentTab = 2 },
                     icon = { Icon(imageVector = Icons.Default.Info, contentDescription = null) },
-                    label = { Text(text = "عن التطبيق", fontWeight = FontWeight.Bold) },
+                    label = { Text(text = "About", fontWeight = FontWeight.Bold) },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = TextPrimary,
                         selectedTextColor = TextPrimary,
@@ -206,7 +206,7 @@ fun MainAppLayout(viewModel: MainViewModel) {
             onDismissRequest = { showPermissionDialog = false },
             title = {
                 Text(
-                    text = if (dialogPermissionType == "OVERLAY") "تفعيل ميزة النافذة العائمة" else "تفعيل خدمة إمكانية الوصول",
+                    text = if (dialogPermissionType == "OVERLAY") "Enable Overlay Permission" else "Enable Accessibility Service",
                     color = TextPrimary,
                     fontWeight = FontWeight.Bold
                 )
@@ -214,9 +214,9 @@ fun MainAppLayout(viewModel: MainViewModel) {
             text = {
                 Text(
                     text = if (dialogPermissionType == "OVERLAY") {
-                        "يحتاج PointerX لإذن 'العرض فوق التطبيقات الأخرى' ليتمكن من رسم الماوس واللوحة العائمة على شاشتك بنجاح. يرجى تفعيل الخيار من قائمة النظام."
+                        "PointerX requires the 'Draw over other apps' permission to render the cursor and floating touch panel on your screen. Please enable it in system settings."
                     } else {
-                        "من أجل تنفيذ نقرات الماوس، الضغط المطول، التمرير التلقائي، والسحب بأمان بدون روت، يرجى تفعيل خدمة 'PointerX' في قائمة إمكانية الوصول في هاتفك."
+                        "To simulate clicks, long presses, drag-and-drop, and smooth scrolling without root access, please enable the 'PointerX' service in your phone's Accessibility settings."
                     },
                     color = TextSecondary,
                     lineHeight = 20.sp
@@ -240,12 +240,12 @@ fun MainAppLayout(viewModel: MainViewModel) {
                     colors = ButtonDefaults.buttonColors(containerColor = AccentPrimary),
                     shape = RoundedCornerShape(10.dp)
                 ) {
-                    Text(text = "افتح الإعدادات لتفعيلها", color = TextPrimary, fontWeight = FontWeight.Bold)
+                    Text(text = "Open Settings", color = TextPrimary, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showPermissionDialog = false }) {
-                    Text(text = "إلغاء", color = TextSecondary)
+                    Text(text = "Cancel", color = TextSecondary)
                 }
             },
             containerColor = BgSecondary
@@ -281,7 +281,7 @@ private fun toggleService(
                 context.startService(intent)
             }
         } catch (e: Exception) {
-            Toast.makeText(context, "فشل بدء الخدمة: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Failed to start service: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
         }
     } else {
         // Stop service

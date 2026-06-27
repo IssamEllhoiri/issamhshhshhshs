@@ -37,7 +37,7 @@ class PointerAccessibilityService : AccessibilityService() {
 
     fun onCursorMoved(x: Int, y: Int) {
         val currentTime = System.currentTimeMillis()
-        if (currentTime - lastUpdateTime >= 50) { // Throttled node lookup: 50ms interval (20 updates/sec) for super-fast PC feeling
+        if (currentTime - lastUpdateTime >= 150) { // Throttled node lookup: 150ms interval to reduce lag
             lastUpdateTime = currentTime
             lastNodeJob?.cancel()
             lastNodeJob = serviceScope.launch {
@@ -52,7 +52,7 @@ class PointerAccessibilityService : AccessibilityService() {
             // Ensure the final hover state is captured when the cursor stops moving
             lastNodeJob?.cancel()
             lastNodeJob = serviceScope.launch {
-                delay(60) // Short delay to capture final rested position
+                delay(160) // Short delay to capture final rested position
                 if (!PointerServiceCoordinator.isDragMode.value && !PointerServiceCoordinator.isScrollMode.value) {
                     val result = detectShapeAtPoint(x, y)
                     withContext(Dispatchers.Main) {
@@ -68,25 +68,57 @@ class PointerAccessibilityService : AccessibilityService() {
             rootInActiveWindow
         } catch (e: Exception) {
             null
-        } ?: return Pair(PointerServiceCoordinator.defaultCursorShape, "GENERAL")
-
-        val node = findNodeAtPoint(root, x, y)
-        if (node == null) {
-            try {
-                root.recycle()
-            } catch (e: Exception) {}
-            return Pair(PointerServiceCoordinator.defaultCursorShape, "GENERAL")
         }
 
-        val result = determineShapeFromNode(node)
-        // Recycle traversed node structure safely (except root which we recycle manually or let systems handle)
+        if (root != null) {
+            val node = findNodeAtPoint(root, x, y)
+            if (node != null) {
+                val result = determineShapeFromNode(node)
+                try {
+                    node.recycle()
+                } catch (e: Exception) {}
+                try {
+                    root.recycle()
+                } catch (e: Exception) {}
+                // If it's a specific interactive element, return it directly!
+                if (result.first != PointerServiceCoordinator.defaultCursorShape) {
+                    return result
+                }
+            } else {
+                try {
+                    root.recycle()
+                } catch (e: Exception) {}
+            }
+        }
+
+        // Fallback check: check other windows (like status bar/nav bar/dialogs) if not found in active root
         try {
-            node.recycle()
+            val wins = windows
+            if (wins != null) {
+                for (win in wins) {
+                    val r = win.root ?: continue
+                    val node = findNodeAtPoint(r, x, y)
+                    if (node != null) {
+                        val result = determineShapeFromNode(node)
+                        try {
+                            node.recycle()
+                        } catch (e: Exception) {}
+                        try {
+                            r.recycle()
+                        } catch (e: Exception) {}
+                        if (result.first != PointerServiceCoordinator.defaultCursorShape) {
+                            return result
+                        }
+                    } else {
+                        try {
+                            r.recycle()
+                        } catch (e: Exception) {}
+                    }
+                }
+            }
         } catch (e: Exception) {}
-        try {
-            root.recycle()
-        } catch (e: Exception) {}
-        return result
+
+        return Pair(PointerServiceCoordinator.defaultCursorShape, "GENERAL")
     }
 
     private fun findNodeAtPoint(node: AccessibilityNodeInfo, x: Int, y: Int, depth: Int = 0): AccessibilityNodeInfo? {
@@ -193,7 +225,7 @@ class PointerAccessibilityService : AccessibilityService() {
     }
 
     // Gesture dispatching implementations
-    fun clickAt(x: Float, y: Float, duration: Long = 50L) {
+    fun clickAt(x: Float, y: Float, duration: Long = 15L) {
         val path = Path().apply { moveTo(x, y) }
         val stroke = GestureDescription.StrokeDescription(path, 0L, duration)
         val builder = GestureDescription.Builder().addStroke(stroke)
@@ -202,8 +234,8 @@ class PointerAccessibilityService : AccessibilityService() {
 
     fun doubleClickAt(x: Float, y: Float) {
         val path = Path().apply { moveTo(x, y) }
-        val stroke1 = GestureDescription.StrokeDescription(path, 0L, 50L)
-        val stroke2 = GestureDescription.StrokeDescription(path, 130L, 50L) // 130ms delay
+        val stroke1 = GestureDescription.StrokeDescription(path, 0L, 15L)
+        val stroke2 = GestureDescription.StrokeDescription(path, 100L, 15L) // 100ms delay
         val builder = GestureDescription.Builder().addStroke(stroke1).addStroke(stroke2)
         dispatchGesture(builder.build(), null, null)
     }

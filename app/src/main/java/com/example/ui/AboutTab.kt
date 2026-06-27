@@ -87,7 +87,7 @@ fun AboutTab() {
         )
 
         Text(
-            text = "تطبيق محاكاة مؤشر الماوس الاحترافي لنظام أندرويد",
+            text = "Professional mouse pointer simulator for Android",
             style = MaterialTheme.typography.bodyMedium.copy(color = AccentSecondary),
             textAlign = TextAlign.Center
         )
@@ -96,7 +96,7 @@ fun AboutTab() {
 
         // General info text block
         Text(
-            text = "تم تصميم PointerX لحل مشكلة استخدام الهواتف ذات الشاشات الكبيرة بيد واحدة تمامًا. يوفر التطبيق لوحة لمس عائمة دقيقة متكاملة وذات استجابة سريعة جداً لرسم المؤشر وتنفيذ نقرات الكليك والمسح التمريري ومحاكاة السحب بأمان كامل ودون الحاجة لصلاحيات Root.",
+            text = "PointerX is designed to solve the challenge of using large-screen phones with one hand. It provides a precise, highly responsive floating touchpad to control a virtual mouse cursor, perform clicks, scrolls, and drag gestures securely without requiring root access.",
             style = MaterialTheme.typography.bodyMedium.copy(
                 color = TextSecondary,
                 lineHeight = 22.sp
@@ -117,18 +117,18 @@ fun AboutTab() {
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = "المميزات والتقنيات البرمجية",
+                    text = "Features & Technologies",
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = TextPrimary
                     )
                 )
 
-                AboutFeatureRow(icon = Icons.Default.Star, text = "دعم كامل لنواة الحظر وحواف الشاشة الذكية.")
-                AboutFeatureRow(icon = Icons.Default.Refresh, text = "خوارزمية تسريع المؤشر التراكمي (Cursor Acceleration).")
-                AboutFeatureRow(icon = Icons.Default.Notifications, text = "تغذية راجعة لمسية مخصصة بكل حدث (Haptic Effects).")
-                AboutFeatureRow(icon = Icons.Default.Settings, text = "تخزين الإعدادات الآمن عبر Jetpack Preferences DataStore.")
-                AboutFeatureRow(icon = Icons.Default.Lock, text = "أمان مطلق يحفظ خصوصية بيانات المستخدم 100%.")
+                AboutFeatureRow(icon = Icons.Default.Star, text = "Full support for display cutouts and smart edge snapping.")
+                AboutFeatureRow(icon = Icons.Default.Refresh, text = "Optimized cursor acceleration algorithms.")
+                AboutFeatureRow(icon = Icons.Default.Notifications, text = "Custom haptic feedback (vibration effects) for every action.")
+                AboutFeatureRow(icon = Icons.Default.Settings, text = "Secure local storage via Jetpack Preferences DataStore.")
+                AboutFeatureRow(icon = Icons.Default.Lock, text = "Absolute security keeping 100% of user data local and private.")
             }
         }
 
@@ -144,7 +144,7 @@ fun AboutTab() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "الإصدار الحالي: v1.0.0 (Build 35)",
+                    text = "Current Version: v1.1.0-Optimized (Build 36)",
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = TextPrimary
@@ -152,7 +152,7 @@ fun AboutTab() {
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "تطوير فريق PointerX التقني. كافة الحقوق محفوظة © 2026",
+                    text = "Developed by PointerX Team. All rights reserved © 2026",
                     style = MaterialTheme.typography.bodySmall.copy(color = TextSecondary)
                 )
             }

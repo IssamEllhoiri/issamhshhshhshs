@@ -425,12 +425,6 @@ class FloatingPanelView(
                         newCursorY = newCursorY.coerceIn(0f, screenHeight)
 
                         PointerServiceCoordinator.updateCursorPosition(newCursorX, newCursorY)
-                        
-                        // Increment session distance
-                        scope.launch {
-                            val travel = sqrt(dx * dx + dy * dy)
-                            dataStore.addPointerDistance(travel / density) // in DP units
-                        }
                     }
 
                     lastX = curX
@@ -447,25 +441,8 @@ class FloatingPanelView(
 
                     // Touchpad tap detector (Short Tap to click)
                     if (duration < 200 && travelDist < 10 * density) {
-                        if (PointerServiceCoordinator.isDragMode.value) {
-                            // Drag mode clicks
-                            val startX = PointerServiceCoordinator.cursorX.value
-                            val startY = PointerServiceCoordinator.cursorY.value
-                            PointerServiceCoordinator.requestClick()
-                            if (vibrationEnabled) VibrationUtils.vibrateLeftClick(context)
-                            
-                            // Check if drag completed (User clicks twice in drag mode: start and end)
-                            scope.launch {
-                                dataStore.incrementDragCount()
-                                dataStore.incrementClicksToday()
-                            }
-                        } else {
-                            PointerServiceCoordinator.requestClick()
-                            if (vibrationEnabled) VibrationUtils.vibrateLeftClick(context)
-                            scope.launch {
-                                dataStore.incrementClicksToday()
-                            }
-                        }
+                        PointerServiceCoordinator.requestClick()
+                        if (vibrationEnabled) VibrationUtils.vibrateLeftClick(context)
                     }
                     return true
                 }
@@ -916,21 +893,17 @@ class FloatingPanelView(
             // Row 1
             addButton(0, 0, "L-CLK", IconType.L_CLICK) {
                 PointerServiceCoordinator.requestClick()
-                scope.launch { dataStore.incrementClicksToday() }
             }
             addButton(1, 0, "R-CLK", IconType.R_CLICK) {
                 PointerServiceCoordinator.requestRightClick()
-                scope.launch { dataStore.incrementClicksToday() }
             }
             addButton(2, 0, "D-CLK", IconType.D_CLICK) {
                 PointerServiceCoordinator.requestDoubleClick()
-                scope.launch { dataStore.incrementClicksToday() }
             }
 
             // Row 2
             addButton(0, 1, "LNG-CLK", IconType.LONG_CLICK) {
                 PointerServiceCoordinator.requestLongClick(longClickMs.toLong())
-                scope.launch { dataStore.incrementClicksToday() }
             }
             addButton(1, 1, "DRAG", IconType.DRAG) { btn ->
                 val nextDrag = !PointerServiceCoordinator.isDragMode.value

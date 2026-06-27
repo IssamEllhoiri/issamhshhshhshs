@@ -118,12 +118,16 @@ class PointerOverlayService : Service() {
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
             x = (startX - (cursorSize / 2f)).toInt()
             y = (startY - (cursorSize / 2f)).toInt()
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            }
         }
 
         cursorView = CursorView(this).apply {
@@ -248,6 +252,11 @@ class PointerOverlayService : Service() {
                 cursorView?.setTextCursorImage(imagePath)
             }
         }
+    }
+
+    private fun getStatusBarHeight(): Int {
+        val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
+        return if (resourceId > 0) resources.getDimensionPixelSize(resourceId) else 0
     }
 
     private fun updateCursorPositionOnScreen(x: Float, y: Float) {

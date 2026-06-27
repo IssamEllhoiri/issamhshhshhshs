@@ -9,6 +9,7 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -102,25 +103,40 @@ fun OnboardingScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                // Header (App Brand Indicator)
+                // Header (App Brand Indicator) with Skip Button
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 16.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = null,
-                        tint = AccentPrimary,
-                        modifier = Modifier.size(28.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "PointerX",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = TextPrimary,
-                            letterSpacing = 1.5.sp
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = null,
+                            tint = AccentPrimary,
+                            modifier = Modifier.size(28.dp)
                         )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "PointerX",
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary,
+                                letterSpacing = 1.5.sp
+                            )
+                        )
+                    }
+                    Text(
+                        text = "Skip",
+                        color = AccentPrimary,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier
+                            .clickable {
+                                viewModel.completeFirstRun()
+                                onComplete()
+                            }
+                            .padding(8.dp)
                     )
                 }
 
@@ -200,7 +216,7 @@ fun OnboardingScreen(
                                 onComplete()
                             }
                         },
-                        enabled = currentPage != 1 || (overlayGranted && accessibilityGranted),
+                        enabled = true,
                         colors = ButtonDefaults.buttonColors(containerColor = AccentPrimary),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier
@@ -209,10 +225,10 @@ fun OnboardingScreen(
                     ) {
                         Text(
                             text = when (currentPage) {
-                                0 -> "البدء والتعريف"
-                                1 -> "استمر بعد التفعيل"
-                                2 -> "فهمت طريقة التحكم"
-                                else -> "تشغيل المؤشر واللوحة"
+                                0 -> "Get Started"
+                                1 -> "Continue after enabling"
+                                2 -> "I understand"
+                                else -> "Launch Controller"
                             },
                             style = MaterialTheme.typography.bodyLarge.copy(
                                 fontWeight = FontWeight.Bold,
@@ -224,7 +240,7 @@ fun OnboardingScreen(
                     if (currentPage > 0) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "رجوع",
+                            text = "Back",
                             color = TextSecondary,
                             fontWeight = FontWeight.Medium,
                             modifier = Modifier
@@ -245,14 +261,17 @@ fun WelcomePage() {
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.padding(16.dp)
     ) {
-        // Glowing Canvas mouse drawing instead of unstable Lottie file
-        var ticks by remember { mutableFloatStateOf(0f) }
-        LaunchedEffect(Unit) {
-            while (true) {
-                ticks += 0.05f
-                kotlinx.coroutines.delay(16)
-            }
-        }
+        // Highly efficient native animation to avoid locking UI thread
+        val infiniteTransition = rememberInfiniteTransition(label = "welcome_animation")
+        val ticks by infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 2f * Math.PI.toFloat(),
+            animationSpec = infiniteRepeatable(
+                animation = tween(4000, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart
+            ),
+            label = "ticks"
+        )
 
         Canvas(
             modifier = Modifier
@@ -312,7 +331,7 @@ fun WelcomePage() {
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "مؤشر ماوس ذكي متكامل",
+            text = "Smart Mouse Pointer",
             style = MaterialTheme.typography.headlineMedium.copy(
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary
@@ -323,7 +342,7 @@ fun WelcomePage() {
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "PointerX يمنحك لوحة لمس عائمة ومؤشر ماوس دقيق يحاكي تجربة الكومبيوتر بالكامل لتسهيل استخدام هاتفك بيد واحدة أو كأداة تحكم متقدمة.",
+            text = "PointerX provides a floating control panel and a high-precision mouse cursor to simulate full desktop interaction, making it extremely easy to navigate large screens with one hand.",
             style = MaterialTheme.typography.bodyMedium.copy(
                 color = TextSecondary,
                 lineHeight = 22.sp
@@ -350,7 +369,7 @@ fun PermissionsPage(
         modifier = Modifier.padding(16.dp)
     ) {
         Text(
-            text = "الصلاحيات الأساسية المطلوبة",
+            text = "Required Core Permissions",
             style = MaterialTheme.typography.headlineSmall.copy(
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary
@@ -361,7 +380,7 @@ fun PermissionsPage(
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "يحتاج التطبيق تفعيل هذه الميزات للعمل فوق التطبيقات وتنفيذ نقرات الماوس الذكية بنجاح.",
+            text = "The app requires these system options enabled to draw overlays and safely trigger mouse clicks and scroll gestures.",
             style = MaterialTheme.typography.bodyMedium.copy(color = TextSecondary),
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 12.dp)
@@ -371,8 +390,8 @@ fun PermissionsPage(
 
         // 1. Overlay Permission Card
         PermissionRowCard(
-            title = "رسم نافذة عائمة (Overlay)",
-            description = "مطلوب لعرض المؤشر ولوحة التحكم فوق جميع التطبيقات الأخرى.",
+            title = "Draw Floating Window (Overlay)",
+            description = "Allows the mouse cursor and control panel to appear over all other applications.",
             isGranted = overlayGranted,
             onGrantClick = onRequestOverlay
         )
@@ -381,8 +400,8 @@ fun PermissionsPage(
 
         // 2. Accessibility Permission Card
         PermissionRowCard(
-            title = "خدمة إمكانية الوصول (Accessibility)",
-            description = "الخدمة الوحيدة التي تمكن التطبيق من إرسال النقرات والإيماءات بمسار سليم.",
+            title = "Accessibility Service",
+            description = "Required to safely trigger click, drag, and scroll gestures on your behalf.",
             isGranted = accessibilityGranted,
             onGrantClick = onRequestAccessibility
         )
@@ -391,8 +410,8 @@ fun PermissionsPage(
 
         // 3. Notification Permission Card
         PermissionRowCard(
-            title = "الإشعارات (Notifications)",
-            description = "مطلوب لإظهار الإشعار الدائم الذي يمنع النظام من إغلاق خدمة الماوس.",
+            title = "Notifications Permission",
+            description = "Allows the permanent foreground service notification to prevent Android from closing the mouse.",
             isGranted = notificationGranted,
             onGrantClick = onRequestNotification
         )
@@ -450,7 +469,7 @@ fun PermissionRowCard(
 
             if (isGranted) {
                 Text(
-                    text = "مفعّل",
+                    text = "Granted",
                     color = SuccessColor,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 8.dp)
@@ -462,7 +481,7 @@ fun PermissionRowCard(
                     shape = RoundedCornerShape(8.dp),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                 ) {
-                    Text(text = "منح", color = TextPrimary, fontWeight = FontWeight.Bold)
+                    Text(text = "Grant", color = TextPrimary, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -477,7 +496,7 @@ fun TutorialPage() {
         modifier = Modifier.padding(16.dp)
     ) {
         Text(
-            text = "كيفية التحكم والاستخدام",
+            text = "How to Control & Use",
             style = MaterialTheme.typography.headlineSmall.copy(
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary
@@ -486,14 +505,17 @@ fun TutorialPage() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Visual Canvas of Touchpad dragging simulation
-        var progress by remember { mutableFloatStateOf(0f) }
-        LaunchedEffect(Unit) {
-            while (true) {
-                progress += 0.02f
-                kotlinx.coroutines.delay(16)
-            }
-        }
+        // Highly efficient native animation to avoid locking UI thread
+        val infiniteTransition = rememberInfiniteTransition(label = "tutorial_animation")
+        val progress by infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 2f * Math.PI.toFloat(),
+            animationSpec = infiniteRepeatable(
+                animation = tween(6000, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart
+            ),
+            label = "progress"
+        )
 
         Canvas(
             modifier = Modifier
@@ -537,11 +559,11 @@ fun TutorialPage() {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        TutorialRow(icon = Icons.Default.Favorite, text = "حرك إصبعك داخل منطقة اللمس الرمادية لتحريك المؤشر بدقة متناهية.")
+        TutorialRow(icon = Icons.Default.Favorite, text = "Slide your finger inside the gray touchpad area to move the virtual mouse cursor with precision.")
         Spacer(modifier = Modifier.height(12.dp))
-        TutorialRow(icon = Icons.Default.Star, text = "انقر نقرة سريعة في أي مكان داخل منطقة اللمس لتنفيذ نقرة يسار اعتيادية.")
+        TutorialRow(icon = Icons.Default.Star, text = "Tap quickly anywhere inside the touchpad area to trigger a standard left mouse click.")
         Spacer(modifier = Modifier.height(12.dp))
-        TutorialRow(icon = Icons.Default.List, text = "اضغط DRAG أو SCROLL في شبكة الأزرار للتبديل لأوضاع السحب والتمرير السلس.")
+        TutorialRow(icon = Icons.Default.List, text = "Tap DRAG or SCROLL in the button grid to switch between drag-and-drop and scroll-wheel modes.")
     }
 }
 
@@ -622,7 +644,7 @@ fun ReadyPage() {
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "أنت جاهز تمامًا للتحليق!",
+            text = "You're All Set!",
             style = MaterialTheme.typography.headlineMedium.copy(
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary
@@ -633,7 +655,7 @@ fun ReadyPage() {
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "تم ضبط كافة الإعدادات الأساسية. يمكنك تخصيص أحجام الماوس وحساسية السحب واختصارات لوحة المفاتيح والاهتزازات في شاشة الإعدادات لاحقًا.",
+            text = "All basic settings are ready. You can customize the cursor size, colors, speed sensitivity, and haptic feedback under the Settings tab anytime.",
             style = MaterialTheme.typography.bodyMedium.copy(
                 color = TextSecondary,
                 lineHeight = 22.sp
