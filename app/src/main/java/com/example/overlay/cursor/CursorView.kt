@@ -91,7 +91,7 @@ class CursorView @JvmOverloads constructor(
             "BLACK" -> Color.BLACK
             else -> Color.parseColor("#EEEEF8") // WHITE
         }
-        strokePaint.color = if (colorString.uppercase() == "BLACK") Color.WHITE else cursorColor // Make outline color same as main color for a solid, unified look, except for Black cursor which uses a White outline
+        strokePaint.color = cursorColor // Make outline color same as main color for a solid, unified look
         invalidate()
     }
 

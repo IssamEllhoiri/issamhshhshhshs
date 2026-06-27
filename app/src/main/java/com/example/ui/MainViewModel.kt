@@ -22,6 +22,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val isOverlayActive: StateFlow<Boolean> = PointerServiceCoordinator.isOverlayActive
     val isAccessibilityActive: StateFlow<Boolean> = PointerServiceCoordinator.isAccessibilityActive
 
+    private val _isSimulatorActive = kotlinx.coroutines.flow.MutableStateFlow(false)
+    val isSimulatorActive: StateFlow<Boolean> = _isSimulatorActive
+
+    fun setSimulatorActive(active: Boolean) {
+        _isSimulatorActive.value = active
+    }
+
     // Settings flows
     val firstRun: StateFlow<Boolean> = dataStore.firstRunFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)

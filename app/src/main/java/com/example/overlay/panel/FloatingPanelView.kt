@@ -195,6 +195,7 @@ class FloatingPanelView(
         isCompactMode = !isCompactMode
         
         expandedView.updateCompactState(isCompactMode)
+        expandedView.toggleCompactButton.invalidate()
         
         val targetHeight = if (isCompactMode) compactExpandedHeight else expandedHeight
         
@@ -762,7 +763,7 @@ class FloatingPanelView(
         private lateinit var touchpadArea: TouchpadArea
         lateinit var gridLayout: FrameLayout
         private val buttonList = mutableListOf<PanelButton>()
-        lateinit var toggleCompactButton: android.widget.TextView
+        lateinit var toggleCompactButton: android.view.View
 
         init {
             setupPanel()
@@ -788,24 +789,61 @@ class FloatingPanelView(
                 }
                 addView(titleTv)
 
-                // High-visibility transparent eye emoji button to toggle compact mode (showing/hiding buttons grid)
-                toggleCompactButton = android.widget.TextView(context).apply {
-                    text = "👁️"
-                    setTextColor(Color.WHITE)
-                    textSize = 16f
-                    gravity = Gravity.CENTER
-                    setPadding((8 * density).toInt(), (4 * density).toInt(), (8 * density).toInt(), (4 * density).toInt())
+                // High-visibility professional custom vector eye button to toggle compact mode
+                toggleCompactButton = object : View(context) {
+                    private val eyePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                        color = Color.parseColor("#EEEEF8")
+                        strokeWidth = 2f * density
+                        style = Paint.Style.STROKE
+                        strokeCap = Paint.Cap.ROUND
+                        strokeJoin = Paint.Join.ROUND
+                    }
+                    private val pupilPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                        color = Color.parseColor("#EEEEF8")
+                        style = Paint.Style.FILL
+                    }
                     
-                    // Transparent background (selectableItemBackground if supported, or null for simple click)
+                    override fun onDraw(canvas: Canvas) {
+                        super.onDraw(canvas)
+                        val w = width.toFloat()
+                        val h = height.toFloat()
+                        val cx = w / 2f
+                        val cy = h / 2f
+                        
+                        val eyeW = 9f * density
+                        val eyeH = 4.5f * density
+                        
+                        val path = Path().apply {
+                            // Upper lid
+                            moveTo(cx - eyeW, cy)
+                            quadTo(cx, cy - eyeH, cx + eyeW, cy)
+                            // Lower lid
+                            quadTo(cx, cy + eyeH, cx - eyeW, cy)
+                            close()
+                        }
+                        canvas.drawPath(path, eyePaint)
+                        
+                        // Pupil and slash
+                        if (!isCompactMode) {
+                            canvas.drawCircle(cx, cy, 2.5f * density, pupilPaint)
+                        } else {
+                            canvas.drawCircle(cx, cy, 2.5f * density, pupilPaint)
+                            // Diagonal strike line
+                            canvas.drawLine(cx - eyeW - 1f * density, cy - eyeH - 1f * density, cx + eyeW + 1f * density, cy + eyeH + 1f * density, eyePaint)
+                        }
+                    }
+                }.apply {
                     val outValue = android.util.TypedValue()
                     context.theme.resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, outValue, true)
                     setBackgroundResource(outValue.resourceId)
                     
-                    layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.START or Gravity.CENTER_VERTICAL).apply {
-                        leftMargin = (16 * density).toInt()
+                    layoutParams = LayoutParams((32 * density).toInt(), (32 * density).toInt(), Gravity.END or Gravity.CENTER_VERTICAL).apply {
+                        rightMargin = (84 * density).toInt()
                     }
                     
-                    setOnClickListener { toggleCompactMode() }
+                    setOnClickListener {
+                        toggleCompactMode()
+                    }
                 }
                 addView(toggleCompactButton)
 

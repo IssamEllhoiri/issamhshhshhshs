@@ -33,6 +33,7 @@ import com.example.ui.HomeTab
 import com.example.ui.MainViewModel
 import com.example.ui.OnboardingScreen
 import com.example.ui.SettingsTab
+import com.example.ui.SimulatorSandbox
 import com.example.ui.theme.MyApplicationTheme
 import com.example.ui.theme.*
 
@@ -46,16 +47,23 @@ class MainActivity : ComponentActivity() {
         setContent {
             MyApplicationTheme {
                 val firstRun by viewModel.firstRun.collectAsState()
+                val isSimulatorActive by viewModel.isSimulatorActive.collectAsState()
 
-                if (firstRun) {
-                    OnboardingScreen(
-                        viewModel = viewModel,
-                        onComplete = {
-                            // Onboarding completed, proceed
-                        }
-                    )
-                } else {
-                    MainAppLayout(viewModel)
+                Box(modifier = Modifier.fillMaxSize()) {
+                    if (firstRun) {
+                        OnboardingScreen(
+                            viewModel = viewModel,
+                            onComplete = {
+                                // Onboarding completed, proceed
+                            }
+                        )
+                    } else {
+                        MainAppLayout(viewModel)
+                    }
+
+                    if (isSimulatorActive) {
+                        SimulatorSandbox(viewModel = viewModel)
+                    }
                 }
             }
         }
