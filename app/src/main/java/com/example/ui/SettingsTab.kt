@@ -35,6 +35,10 @@ fun SettingsTab(viewModel: MainViewModel) {
 
     // Collect settings flows
     val cursorSize by viewModel.cursorSize.collectAsState()
+    val cursorSizeText by viewModel.cursorSizeText.collectAsState()
+    val cursorSizeHover by viewModel.cursorSizeHover.collectAsState()
+    val trackTextCursor by viewModel.trackTextCursor.collectAsState()
+    val trackHoverCursor by viewModel.trackHoverCursor.collectAsState()
     val cursorSensitivity by viewModel.cursorSensitivity.collectAsState()
     val cursorColor by viewModel.cursorColor.collectAsState()
     val cursorClickVfx by viewModel.cursorClickVfx.collectAsState()
@@ -81,19 +85,73 @@ fun SettingsTab(viewModel: MainViewModel) {
             Column(modifier = Modifier.padding(16.dp)) {
                 // Size
                 Text(
-                    text = "Cursor Size ($cursorSize dp)",
+                    text = "حجم المؤشر العام / General Cursor Size ($cursorSize dp)",
                     style = MaterialTheme.typography.bodyMedium,
                     color = TextPrimary
                 )
                 Slider(
                     value = cursorSize.toFloat(),
                     onValueChange = { viewModel.updateCursorSize(it.toInt()) },
-                    valueRange = 16f..40f,
+                    valueRange = 16f..120f,
                     colors = SliderDefaults.colors(
                         activeTrackColor = AccentPrimary,
                         thumbColor = AccentPrimary
                     )
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Track Text Cursor
+                SettingsToggleRow(
+                    title = "تغيير المؤشر عند حقول النصوص (Track Text Inputs)",
+                    checked = trackTextCursor,
+                    onCheckedChange = { viewModel.updateTrackTextCursor(it) }
+                )
+
+                if (trackTextCursor) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "حجم مؤشر النصوص / Text Cursor Size ($cursorSizeText dp)",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextSecondary
+                    )
+                    Slider(
+                        value = cursorSizeText.toFloat(),
+                        onValueChange = { viewModel.updateCursorSizeText(it.toInt()) },
+                        valueRange = 16f..120f,
+                        colors = SliderDefaults.colors(
+                            activeTrackColor = AccentPrimary,
+                            thumbColor = AccentPrimary
+                        )
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Track Hover Cursor
+                SettingsToggleRow(
+                    title = "تغيير المؤشر عند الروابط والأزرار (Track Clickable Elements)",
+                    checked = trackHoverCursor,
+                    onCheckedChange = { viewModel.updateTrackHoverCursor(it) }
+                )
+
+                if (trackHoverCursor) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "حجم مؤشر الروابط والأزرار / Hover Cursor Size ($cursorSizeHover dp)",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextSecondary
+                    )
+                    Slider(
+                        value = cursorSizeHover.toFloat(),
+                        onValueChange = { viewModel.updateCursorSizeHover(it.toInt()) },
+                        valueRange = 16f..120f,
+                        colors = SliderDefaults.colors(
+                            activeTrackColor = AccentPrimary,
+                            thumbColor = AccentPrimary
+                        )
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(12.dp))
 

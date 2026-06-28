@@ -37,6 +37,9 @@ object PointerServiceCoordinator {
     var hoverCursorShape: CursorShape = CursorShape.POINTER
     var textCursorShape: CursorShape = CursorShape.TEXT
 
+    var trackTextCursor: Boolean = true
+    var trackHoverCursor: Boolean = true
+
     private val _activeCursorType = MutableStateFlow("GENERAL")
     val activeCursorType: StateFlow<String> = _activeCursorType.asStateFlow()
 

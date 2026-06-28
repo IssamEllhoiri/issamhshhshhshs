@@ -15,7 +15,9 @@ class CursorView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
 
     private var cursorShape = CursorShape.DEFAULT
-    private var cursorSizePx = 24f * resources.displayMetrics.density
+    private var cursorSizeDefaultPx = 24f * resources.displayMetrics.density
+    private var cursorSizeTextPx = 24f * resources.displayMetrics.density
+    private var cursorSizeHoverPx = 24f * resources.displayMetrics.density
     private var cursorColor = Color.parseColor("#EEEEF8") // Standard default light
     private var clickVfxEnabled = true
 
@@ -84,7 +86,17 @@ class CursorView @JvmOverloads constructor(
     }
 
     fun setCursorSize(dp: Int) {
-        cursorSizePx = dp * resources.displayMetrics.density
+        cursorSizeDefaultPx = dp * resources.displayMetrics.density
+        invalidate()
+    }
+
+    fun setCursorSizeText(dp: Int) {
+        cursorSizeTextPx = dp * resources.displayMetrics.density
+        invalidate()
+    }
+
+    fun setCursorSizeHover(dp: Int) {
+        cursorSizeHoverPx = dp * resources.displayMetrics.density
         invalidate()
     }
 
@@ -191,6 +203,13 @@ class CursorView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         
+        val activeType = com.example.util.PointerServiceCoordinator.activeCursorType.value
+        val cursorSizePx = when (activeType) {
+            "TEXT" -> cursorSizeTextPx
+            "HOVER", "DRAG" -> cursorSizeHoverPx
+            else -> cursorSizeDefaultPx
+        }
+        
         val hX = hotspotOffset
         val hY = hotspotOffset
 
@@ -201,7 +220,6 @@ class CursorView @JvmOverloads constructor(
         }
 
         // 2. Draw custom image cursor if available for active category
-        val activeType = com.example.util.PointerServiceCoordinator.activeCursorType.value
         val customBitmap = when (activeType) {
             "GENERAL" -> defaultCursorBitmap
             "HOVER" -> hoverCursorBitmap

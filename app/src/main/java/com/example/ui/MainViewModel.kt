@@ -28,6 +28,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     val cursorSize: StateFlow<Int> = dataStore.cursorSizeFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 24)
+        val cursorSizeText: StateFlow<Int> = dataStore.cursorSizeTextFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 24)
+    val cursorSizeHover: StateFlow<Int> = dataStore.cursorSizeHoverFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 24)
+    val trackTextCursor: StateFlow<Boolean> = dataStore.trackTextCursorFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+    val trackHoverCursor: StateFlow<Boolean> = dataStore.trackHoverCursorFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
     val cursorSensitivity: StateFlow<Float> = dataStore.cursorSensitivityFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 2.0f)
@@ -105,6 +113,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     // Update functions
     fun updateCursorSize(size: Int) {
         viewModelScope.launch { dataStore.updateCursorSize(size) }
+    }
+    fun updateCursorSizeText(size: Int) {
+        viewModelScope.launch { dataStore.updateCursorSizeText(size) }
+    }
+    fun updateCursorSizeHover(size: Int) {
+        viewModelScope.launch { dataStore.updateCursorSizeHover(size) }
+    }
+    fun updateTrackTextCursor(track: Boolean) {
+        viewModelScope.launch { dataStore.updateTrackTextCursor(track) }
+    }
+    fun updateTrackHoverCursor(track: Boolean) {
+        viewModelScope.launch { dataStore.updateTrackHoverCursor(track) }
     }
 
     fun updateCursorSensitivity(sensitivity: Float) {

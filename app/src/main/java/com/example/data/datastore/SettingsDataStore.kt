@@ -12,6 +12,10 @@ class SettingsDataStore(private val context: Context) {
 
     companion object {
         val CURSOR_SIZE = intPreferencesKey("cursor_size")
+        val CURSOR_SIZE_TEXT = intPreferencesKey("cursor_size_text")
+        val CURSOR_SIZE_HOVER = intPreferencesKey("cursor_size_hover")
+        val TRACK_TEXT_CURSOR = booleanPreferencesKey("track_text_cursor")
+        val TRACK_HOVER_CURSOR = booleanPreferencesKey("track_hover_cursor")
         val CURSOR_SENSITIVITY = floatPreferencesKey("cursor_sensitivity")
         val CURSOR_ACCEL = booleanPreferencesKey("cursor_accel")
         val CURSOR_COLOR = stringPreferencesKey("cursor_color")
@@ -56,6 +60,10 @@ class SettingsDataStore(private val context: Context) {
     }
 
     val cursorSizeFlow: Flow<Int> = context.dataStore.data.map { it[CURSOR_SIZE] ?: 24 }
+    val cursorSizeTextFlow: Flow<Int> = context.dataStore.data.map { it[CURSOR_SIZE_TEXT] ?: 24 }
+    val cursorSizeHoverFlow: Flow<Int> = context.dataStore.data.map { it[CURSOR_SIZE_HOVER] ?: 24 }
+    val trackTextCursorFlow: Flow<Boolean> = context.dataStore.data.map { it[TRACK_TEXT_CURSOR] ?: true }
+    val trackHoverCursorFlow: Flow<Boolean> = context.dataStore.data.map { it[TRACK_HOVER_CURSOR] ?: true }
     val cursorSensitivityFlow: Flow<Float> = context.dataStore.data.map { it[CURSOR_SENSITIVITY] ?: 2.0f }
     val cursorAccelFlow: Flow<Boolean> = context.dataStore.data.map { it[CURSOR_ACCEL] ?: true }
     val cursorColorFlow: Flow<String> = context.dataStore.data.map { it[CURSOR_COLOR] ?: "WHITE" }
@@ -126,6 +134,10 @@ class SettingsDataStore(private val context: Context) {
     }
 
     suspend fun updateCursorSize(size: Int) = context.dataStore.edit { it[CURSOR_SIZE] = size }
+    suspend fun updateCursorSizeText(size: Int) = context.dataStore.edit { it[CURSOR_SIZE_TEXT] = size }
+    suspend fun updateCursorSizeHover(size: Int) = context.dataStore.edit { it[CURSOR_SIZE_HOVER] = size }
+    suspend fun updateTrackTextCursor(track: Boolean) = context.dataStore.edit { it[TRACK_TEXT_CURSOR] = track }
+    suspend fun updateTrackHoverCursor(track: Boolean) = context.dataStore.edit { it[TRACK_HOVER_CURSOR] = track }
     suspend fun updateCursorSensitivity(sensitivity: Float) = context.dataStore.edit { it[CURSOR_SENSITIVITY] = sensitivity }
     suspend fun updateCursorAccel(accel: Boolean) = context.dataStore.edit { it[CURSOR_ACCEL] = accel }
     suspend fun updateCursorColor(color: String) = context.dataStore.edit { it[CURSOR_COLOR] = color }

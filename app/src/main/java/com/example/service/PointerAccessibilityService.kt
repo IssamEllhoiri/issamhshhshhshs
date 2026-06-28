@@ -36,8 +36,16 @@ class PointerAccessibilityService : AccessibilityService() {
     }
 
     fun onCursorMoved(x: Int, y: Int) {
+        val trackText = PointerServiceCoordinator.trackTextCursor
+        val trackHover = PointerServiceCoordinator.trackHoverCursor
+        if (!trackText && !trackHover) {
+            lastNodeJob?.cancel()
+            PointerServiceCoordinator.updateCursorShape(PointerServiceCoordinator.defaultCursorShape, "GENERAL")
+            return
+        }
+
         val currentTime = System.currentTimeMillis()
-        if (currentTime - lastUpdateTime >= 150) { // Throttled node lookup: 150ms interval to reduce lag
+        if (currentTime - lastUpdateTime >= 60) { // Much faster throttled lookup to feel snappy and instant (60ms)
             lastUpdateTime = currentTime
             lastNodeJob?.cancel()
             lastNodeJob = serviceScope.launch {
@@ -49,10 +57,10 @@ class PointerAccessibilityService : AccessibilityService() {
                 }
             }
         } else {
-            // Ensure the final hover state is captured when the cursor stops moving
+            // Ensure the final hover state is captured quickly when the cursor stops moving
             lastNodeJob?.cancel()
             lastNodeJob = serviceScope.launch {
-                delay(160) // Short delay to capture final rested position
+                delay(70) // Short delay to capture final rested position instantly
                 if (!PointerServiceCoordinator.isDragMode.value && !PointerServiceCoordinator.isScrollMode.value) {
                     val result = detectShapeAtPoint(x, y)
                     withContext(Dispatchers.Main) {
@@ -80,10 +88,10 @@ class PointerAccessibilityService : AccessibilityService() {
                 try {
                     root.recycle()
                 } catch (e: Exception) {}
-                // If it's a specific interactive element, return it directly!
-                if (result.first != PointerServiceCoordinator.defaultCursorShape) {
-                    return result
-                }
+                // High Performance: Return the result directly when a node is found in the active window.
+                // This avoids checking other windows when pointing to a general area of the active screen,
+                // making the cursor return to default size/shape instantly!
+                return result
             } else {
                 try {
                     root.recycle()
@@ -172,6 +180,9 @@ class PointerAccessibilityService : AccessibilityService() {
     }
 
     private fun determineShapeFromNode(node: AccessibilityNodeInfo): Pair<CursorShape, String> {
+        val trackText = PointerServiceCoordinator.trackTextCursor
+        val trackHover = PointerServiceCoordinator.trackHoverCursor
+
         val className = node.className?.toString() ?: ""
         val text = node.text?.toString() ?: ""
         val contentDesc = node.contentDescription?.toString() ?: ""
@@ -195,50 +206,58 @@ class PointerAccessibilityService : AccessibilityService() {
                 className.contains("WebView", ignoreCase = true)
 
         // 1. Browser Search Bar & Web Search Engine Inputs Detection (محرك البحث)
-        val isSearchField = (node.isEditable || className.contains("EditText", ignoreCase = true)) ||
-                (isBrowserPackage && (
-                    viewId.contains("search") || viewId.contains("url") || viewId.contains("address") || viewId.contains("omnibox") || viewId.contains("location") ||
-                    lowerText.contains("search") || lowerText.contains("بحث") || lowerText.contains("find") || lowerText.contains("اكتب") || lowerText.contains("type") || lowerText.contains("عنوان") ||
-                    lowerDesc.contains("search") || lowerDesc.contains("بحث") || lowerDesc.contains("find") || lowerDesc.contains("type") || lowerDesc.contains("url")
-                ))
+        if (trackText) {
+            val isSearchField = (node.isEditable || className.contains("EditText", ignoreCase = true)) ||
+                    (isBrowserPackage && (
+                        viewId.contains("search") || viewId.contains("url") || viewId.contains("address") || viewId.contains("omnibox") || viewId.contains("location") ||
+                        lowerText.contains("search") || lowerText.contains("بحث") || lowerText.contains("find") || lowerText.contains("اكتب") || lowerText.contains("type") || lowerText.contains("عنوان") ||
+                        lowerDesc.contains("search") || lowerDesc.contains("بحث") || lowerDesc.contains("find") || lowerDesc.contains("type") || lowerDesc.contains("url")
+                    ))
 
-        if (isSearchField) {
-            return Pair(PointerServiceCoordinator.textCursorShape, "TEXT")
+            if (isSearchField) {
+                return Pair(PointerServiceCoordinator.textCursorShape, "TEXT")
+            }
         }
 
         // 2. Web Links & Browser Clickable Elements Detection (روابط داخل متصفح)
-        val isLink = lowerText.startsWith("http://") || lowerText.startsWith("https://") ||
-                lowerText.contains("www.") || lowerText.contains("link") || lowerText.contains("رابط") ||
-                lowerDesc.contains("link") || lowerDesc.contains("رابط") ||
-                viewId.contains("link") || viewId.contains("url") ||
-                (isBrowserPackage && node.isClickable && (
-                    className.contains("View") || className.contains("TextView") || className.contains("Anchor") ||
-                    lowerText.isNotEmpty() || lowerDesc.isNotEmpty()
-                ))
+        if (trackHover) {
+            val isLink = lowerText.startsWith("http://") || lowerText.startsWith("https://") ||
+                    lowerText.contains("www.") || lowerText.contains("link") || lowerText.contains("رابط") ||
+                    lowerDesc.contains("link") || lowerDesc.contains("رابط") ||
+                    viewId.contains("link") || viewId.contains("url") ||
+                    (isBrowserPackage && node.isClickable && (
+                        className.contains("View") || className.contains("TextView") || className.contains("Anchor") ||
+                        lowerText.isNotEmpty() || lowerDesc.isNotEmpty()
+                    ))
 
-        // 3. File/Folder detection (ملفات أو مجلدات)
-        val isFileOrFolder = lowerText.contains(".pdf") || lowerText.contains(".zip") || lowerText.contains(".mp3") ||
-                lowerText.contains(".mp4") || lowerText.contains(".jpg") || lowerText.contains(".png") ||
-                lowerText.contains(".txt") || lowerText.contains(".doc") || lowerText.contains(".docx") ||
-                lowerText.contains(".xlsx") || lowerText.contains(".apk") || lowerText.contains(".rar") ||
-                lowerText.contains("file") || lowerText.contains("folder") || lowerText.contains("document") ||
-                lowerText.contains("ملف") || lowerText.contains("مجلد") || lowerText.contains("مستند") ||
-                lowerDesc.contains("file") || lowerDesc.contains("folder") || lowerDesc.contains("document") ||
-                lowerDesc.contains("ملف") || lowerDesc.contains("مجلد") || lowerDesc.contains("مستند") ||
-                viewId.contains("file") || viewId.contains("folder") || viewId.contains("document")
+            // 3. File/Folder detection (ملفات أو مجلدات)
+            val isFileOrFolder = lowerText.contains(".pdf") || lowerText.contains(".zip") || lowerText.contains(".mp3") ||
+                    lowerText.contains(".mp4") || lowerText.contains(".jpg") || lowerText.contains(".png") ||
+                    lowerText.contains(".txt") || lowerText.contains(".doc") || lowerText.contains(".docx") ||
+                    lowerText.contains(".xlsx") || lowerText.contains(".apk") || lowerText.contains(".rar") ||
+                    lowerText.contains("file") || lowerText.contains("folder") || lowerText.contains("document") ||
+                    lowerText.contains("ملف") || lowerText.contains("مجلد") || lowerText.contains("مستند") ||
+                    lowerDesc.contains("file") || lowerDesc.contains("folder") || lowerDesc.contains("document") ||
+                    lowerDesc.contains("ملف") || lowerDesc.contains("مجلد") || lowerDesc.contains("مستند") ||
+                    viewId.contains("file") || viewId.contains("folder") || viewId.contains("document")
 
-        if (isLink || isFileOrFolder) {
-            return Pair(PointerServiceCoordinator.hoverCursorShape, "HOVER")
+            if (isLink || isFileOrFolder) {
+                return Pair(PointerServiceCoordinator.hoverCursorShape, "HOVER")
+            }
         }
 
         // General Editable text fields fallback
-        if (node.isEditable || className.contains("EditText", ignoreCase = true) || (className.contains("TextView", ignoreCase = true) && node.isFocusable)) {
-            return Pair(PointerServiceCoordinator.textCursorShape, "TEXT")
+        if (trackText) {
+            if (node.isEditable || className.contains("EditText", ignoreCase = true) || (className.contains("TextView", ignoreCase = true) && node.isFocusable)) {
+                return Pair(PointerServiceCoordinator.textCursorShape, "TEXT")
+            }
         }
 
         // Clickable interactive nodes (buttons, lists, cards, switches, checkboxes)
-        if (node.isClickable || className.contains("Button", ignoreCase = true) || className.contains("Card", ignoreCase = true) || className.contains("Switch", ignoreCase = true) || className.contains("CheckBox", ignoreCase = true) || className.contains("ImageButton", ignoreCase = true)) {
-            return Pair(PointerServiceCoordinator.hoverCursorShape, "HOVER")
+        if (trackHover) {
+            if (node.isClickable || className.contains("Button", ignoreCase = true) || className.contains("Card", ignoreCase = true) || className.contains("Switch", ignoreCase = true) || className.contains("CheckBox", ignoreCase = true) || className.contains("ImageButton", ignoreCase = true)) {
+                return Pair(PointerServiceCoordinator.hoverCursorShape, "HOVER")
+            }
         }
 
         // Progress indicators/Wait states

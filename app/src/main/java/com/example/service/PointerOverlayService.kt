@@ -178,6 +178,15 @@ class PointerOverlayService : Service() {
                 cursorView?.setShape(shape)
             }
         }
+
+        // Observe active cursor type changes to apply new sizes immediately
+        serviceScope.launch {
+            PointerServiceCoordinator.activeCursorType.collect { _ ->
+                withContext(Dispatchers.Main) {
+                    cursorView?.invalidate()
+                }
+            }
+        }
     }
 
     private fun observePreferences() {
@@ -185,6 +194,16 @@ class PointerOverlayService : Service() {
         serviceScope.launch {
             dataStore.cursorSizeFlow.collectLatest { size ->
                 cursorView?.setCursorSize(size)
+            }
+        }
+        serviceScope.launch {
+            dataStore.cursorSizeTextFlow.collectLatest { size ->
+                cursorView?.setCursorSizeText(size)
+            }
+        }
+        serviceScope.launch {
+            dataStore.cursorSizeHoverFlow.collectLatest { size ->
+                cursorView?.setCursorSizeHover(size)
             }
         }
         serviceScope.launch {
@@ -235,6 +254,16 @@ class PointerOverlayService : Service() {
                     CursorShape.TEXT
                 }
                 PointerServiceCoordinator.textCursorShape = shape
+            }
+        }
+        serviceScope.launch {
+            dataStore.trackTextCursorFlow.collectLatest { enabled ->
+                PointerServiceCoordinator.trackTextCursor = enabled
+            }
+        }
+        serviceScope.launch {
+            dataStore.trackHoverCursorFlow.collectLatest { enabled ->
+                PointerServiceCoordinator.trackHoverCursor = enabled
             }
         }
         serviceScope.launch {
