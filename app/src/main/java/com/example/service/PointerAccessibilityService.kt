@@ -179,15 +179,69 @@ class PointerAccessibilityService : AccessibilityService() {
         }
     }
 
+    private fun findClickableOrSpecialAncestor(node: AccessibilityNodeInfo): AccessibilityNodeInfo? {
+        var current: AccessibilityNodeInfo? = try { AccessibilityNodeInfo.obtain(node) } catch (e: Exception) { null } ?: return null
+        var depth = 0
+        while (current != null && depth < 10) {
+            val className = current.className?.toString() ?: ""
+            val text = current.text?.toString() ?: ""
+            val contentDesc = current.contentDescription?.toString() ?: ""
+            val viewId = current.viewIdResourceName?.lowercase() ?: ""
+            val lowerText = text.lowercase()
+            val lowerDesc = contentDesc.lowercase()
+
+            // If we hit WebView, stop climbing to avoid treating the entire WebView as a link
+            if (className.contains("WebView", ignoreCase = true)) {
+                current.recycle()
+                return null
+            }
+
+            // 1. Check if this node is editable
+            val isEditable = current.isEditable || className.contains("EditText", ignoreCase = true)
+
+            // 2. Check if this node is a file/folder indicator
+            val isFileOrFolder = lowerText.contains(".pdf") || lowerText.contains(".zip") || lowerText.contains(".mp3") ||
+                    lowerText.contains(".mp4") || lowerText.contains(".jpg") || lowerText.contains(".png") ||
+                    lowerText.contains(".txt") || lowerText.contains(".doc") || lowerText.contains(".docx") ||
+                    lowerText.contains(".xlsx") || lowerText.contains(".apk") || lowerText.contains(".rar") ||
+                    lowerText.contains("file") || lowerText.contains("folder") || lowerText.contains("document") ||
+                    lowerText.contains("ملف") || lowerText.contains("مجلد") || lowerText.contains("مستند") ||
+                    lowerDesc.contains("file") || lowerDesc.contains("folder") || lowerDesc.contains("document") ||
+                    lowerDesc.contains("ملف") || lowerDesc.contains("مجلد") || lowerDesc.contains("مستند") ||
+                    viewId.contains("file") || viewId.contains("folder") || viewId.contains("document")
+
+            // 3. Check if this node is a link
+            val isLink = lowerText.startsWith("http://") || lowerText.startsWith("https://") ||
+                    lowerText.contains("www.") || lowerText.contains("link") || lowerText.contains("رابط") ||
+                    lowerDesc.contains("link") || lowerDesc.contains("رابط") ||
+                    viewId.contains("link") || viewId.contains("url")
+
+            // If we found any of these specific indicators, or if the node is clickable/focusable/enabled to be clicked
+            if (isEditable || isFileOrFolder || isLink || current.isClickable) {
+                return current
+            }
+
+            val parent = try { current.parent } catch (e: Exception) { null }
+            current.recycle()
+            current = parent
+            depth++
+        }
+        current?.recycle()
+        return null
+    }
+
     private fun determineShapeFromNode(node: AccessibilityNodeInfo): Pair<CursorShape, String> {
         val trackText = PointerServiceCoordinator.trackTextCursor
         val trackHover = PointerServiceCoordinator.trackHoverCursor
 
-        val className = node.className?.toString() ?: ""
-        val text = node.text?.toString() ?: ""
-        val contentDesc = node.contentDescription?.toString() ?: ""
-        val viewId = node.viewIdResourceName?.lowercase() ?: ""
-        val packageName = node.packageName?.toString() ?: ""
+        val specialNode = findClickableOrSpecialAncestor(node)
+        val activeNode = specialNode ?: node
+
+        val className = activeNode.className?.toString() ?: ""
+        val text = activeNode.text?.toString() ?: ""
+        val contentDesc = activeNode.contentDescription?.toString() ?: ""
+        val viewId = activeNode.viewIdResourceName?.lowercase() ?: ""
+        val packageName = activeNode.packageName?.toString() ?: ""
 
         val lowerText = text.lowercase()
         val lowerDesc = contentDesc.lowercase()
@@ -207,7 +261,7 @@ class PointerAccessibilityService : AccessibilityService() {
 
         // 1. Browser Search Bar & Web Search Engine Inputs Detection (محرك البحث)
         if (trackText) {
-            val isSearchField = (node.isEditable || className.contains("EditText", ignoreCase = true)) ||
+            val isSearchField = (activeNode.isEditable || className.contains("EditText", ignoreCase = true)) ||
                     (isBrowserPackage && (
                         viewId.contains("search") || viewId.contains("url") || viewId.contains("address") || viewId.contains("omnibox") || viewId.contains("location") ||
                         lowerText.contains("search") || lowerText.contains("بحث") || lowerText.contains("find") || lowerText.contains("اكتب") || lowerText.contains("type") || lowerText.contains("عنوان") ||
@@ -215,6 +269,9 @@ class PointerAccessibilityService : AccessibilityService() {
                     ))
 
             if (isSearchField) {
+                if (specialNode != null) {
+                    try { specialNode.recycle() } catch (e: Exception) {}
+                }
                 return Pair(PointerServiceCoordinator.textCursorShape, "TEXT")
             }
         }
@@ -225,7 +282,7 @@ class PointerAccessibilityService : AccessibilityService() {
                     lowerText.contains("www.") || lowerText.contains("link") || lowerText.contains("رابط") ||
                     lowerDesc.contains("link") || lowerDesc.contains("رابط") ||
                     viewId.contains("link") || viewId.contains("url") ||
-                    (isBrowserPackage && node.isClickable && (
+                    (isBrowserPackage && activeNode.isClickable && (
                         className.contains("View") || className.contains("TextView") || className.contains("Anchor") ||
                         lowerText.isNotEmpty() || lowerDesc.isNotEmpty()
                     ))
@@ -242,34 +299,52 @@ class PointerAccessibilityService : AccessibilityService() {
                     viewId.contains("file") || viewId.contains("folder") || viewId.contains("document")
 
             if (isLink || isFileOrFolder) {
+                if (specialNode != null) {
+                    try { specialNode.recycle() } catch (e: Exception) {}
+                }
                 return Pair(PointerServiceCoordinator.hoverCursorShape, "HOVER")
             }
         }
 
         // General Editable text fields fallback
         if (trackText) {
-            if (node.isEditable || className.contains("EditText", ignoreCase = true) || (className.contains("TextView", ignoreCase = true) && node.isFocusable)) {
+            if (activeNode.isEditable || className.contains("EditText", ignoreCase = true) || (className.contains("TextView", ignoreCase = true) && activeNode.isFocusable)) {
+                if (specialNode != null) {
+                    try { specialNode.recycle() } catch (e: Exception) {}
+                }
                 return Pair(PointerServiceCoordinator.textCursorShape, "TEXT")
             }
         }
 
         // Clickable interactive nodes (buttons, lists, cards, switches, checkboxes)
         if (trackHover) {
-            if (node.isClickable || className.contains("Button", ignoreCase = true) || className.contains("Card", ignoreCase = true) || className.contains("Switch", ignoreCase = true) || className.contains("CheckBox", ignoreCase = true) || className.contains("ImageButton", ignoreCase = true)) {
+            if (activeNode.isClickable || className.contains("Button", ignoreCase = true) || className.contains("Card", ignoreCase = true) || className.contains("Switch", ignoreCase = true) || className.contains("CheckBox", ignoreCase = true) || className.contains("ImageButton", ignoreCase = true)) {
+                if (specialNode != null) {
+                    try { specialNode.recycle() } catch (e: Exception) {}
+                }
                 return Pair(PointerServiceCoordinator.hoverCursorShape, "HOVER")
             }
         }
 
         // Progress indicators/Wait states
         if (className.contains("ProgressBar", ignoreCase = true) || className.contains("ProgressIndicator", ignoreCase = true)) {
+            if (specialNode != null) {
+                try { specialNode.recycle() } catch (e: Exception) {}
+            }
             return Pair(CursorShape.WAIT, "WAIT")
         }
 
         // Non-interactive/disabled elements
-        if (!node.isEnabled) {
+        if (!activeNode.isEnabled) {
+            if (specialNode != null) {
+                try { specialNode.recycle() } catch (e: Exception) {}
+            }
             return Pair(CursorShape.NOT_ALLOWED, "NOT_ALLOWED")
         }
 
+        if (specialNode != null) {
+            try { specialNode.recycle() } catch (e: Exception) {}
+        }
         return Pair(PointerServiceCoordinator.defaultCursorShape, "GENERAL")
     }
 
